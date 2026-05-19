@@ -9,11 +9,9 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(session({ secret: 'lms-secret', resave: false, saveUninitialized: false }));
 
-// Add this before app.listen
-app.get('/:page.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', `${req.params.page}.html`), (err) => {
-    if (err) res.status(404).send('Page not found');
-  });
+// Root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 // ─────────────────────────────────────────
@@ -608,6 +606,13 @@ app.post('/api/submissions/:id/message', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Catch-all route — serves any .html file from the public folder
+app.get('/:page.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', `${req.params.page}.html`), (err) => {
+    if (err) res.status(404).send('Page not found');
+  });
 });
 
 app.listen(3000, () => console.log('LMS running at http://localhost:3000'));
