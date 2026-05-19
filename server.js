@@ -9,9 +9,11 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(session({ secret: 'lms-secret', resave: false, saveUninitialized: false }));
 
-// Root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+// Add this before app.listen
+app.get('/:page.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', `${req.params.page}.html`), (err) => {
+    if (err) res.status(404).send('Page not found');
+  });
 });
 
 // ─────────────────────────────────────────
