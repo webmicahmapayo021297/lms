@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lesson Editor — MyLMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <style>
+    :root{--primary:#4f46e5;--primary-hover:#4338ca;--primary-light:#ede9fe;--success:#10b981;--success-light:#d1fae5;--danger:#ef4444;--danger-light:#fee2e2;--warning:#f59e0b;--warning-light:#fef3c7;--orange:#f97316;--orange-light:#fff7ed;--purple:#7c3aed;--purple-light:#f5f3ff;--bg:#f1f5f9;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 12px rgba(0,0,0,0.1);}
+    *{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+    .btn-back{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;font:inherit;font-size:0.82rem;color:var(--muted);cursor:pointer;text-decoration:none;transition:background 0.15s;}
+    .btn-back:hover{background:var(--border);color:var(--text);}
+    .topbar-title{font-size:0.95rem;font-weight:700;}.topbar-subtitle{font-size:0.75rem;color:var(--muted);}
+    .btn{padding:0.5rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font:inherit;font-size:0.875rem;font-weight:500;display:inline-flex;align-items:center;gap:0.4rem;transition:background 0.15s,transform 0.1s;}
+    .btn:active{transform:scale(0.97);}.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-primary{background:var(--primary);color:#fff;}.btn-primary:hover:not(:disabled){background:var(--primary-hover);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}.btn-ghost:hover{background:var(--bg);}
+    .btn-sm{padding:0.35rem 0.75rem;font-size:0.8rem;}
+    .editor-layout{display:flex;max-width:1200px;margin:1.5rem auto;padding:0 1.5rem;gap:1.5rem;align-items:flex-start;}
+    .settings-panel{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:1rem;position:sticky;top:76px;}
+    .panel-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .panel-header{padding:0.85rem 1.1rem;border-bottom:1px solid var(--border);font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);}
+    .panel-body{padding:1rem;display:flex;flex-direction:column;gap:0.85rem;}
+    .form-field{display:flex;flex-direction:column;gap:0.35rem;}
+    .form-label{font-size:0.78rem;font-weight:600;color:var(--text);}
+    .form-hint{font-size:0.7rem;color:var(--muted);}
+    .form-input,.form-select{padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.85rem;background:var(--card);color:var(--text);outline:none;transition:border-color 0.15s;width:100%;}
+    .form-input:focus,.form-select:focus{border-color:var(--primary);}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;}
+    .toggle-label{font-size:0.82rem;color:var(--text);}
+    .toggle{position:relative;width:38px;height:22px;flex-shrink:0;}.toggle input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:background 0.2s;}
+    .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+    .toggle input:checked+.toggle-slider{background:var(--primary);}.toggle input:checked+.toggle-slider::before{transform:translateX(16px);}
+    .content-builder{flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;}
+    .block-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:2px solid transparent;transition:border-color 0.15s;}
+    .block-card:focus-within{border-color:var(--primary);box-shadow:var(--shadow-md);}
+    .block-header{display:flex;align-items:center;gap:0.65rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;border-radius:var(--radius) var(--radius) 0 0;}
+    .block-type-badge{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:0.18rem 0.55rem;border-radius:99px;flex-shrink:0;}
+    .badge-theory{background:var(--primary-light);color:var(--primary);}.badge-code{background:#1e1e2e;color:#a5b4fc;}.badge-note{background:var(--warning-light);color:#92400e;}.badge-tryit{background:var(--success-light);color:#065f46;}.badge-exercise{background:#fce7f3;color:#9d174d;}.badge-challenge{background:var(--orange-light);color:#c2410c;}.badge-assignment{background:var(--purple-light);color:var(--purple);}
+    .block-title-input{flex:1;border:none;background:transparent;font:inherit;font-size:0.875rem;font-weight:600;color:var(--text);outline:none;}
+    .block-title-input::placeholder{color:#b0bbc8;font-weight:400;}
+    .block-actions{display:flex;gap:0.35rem;margin-left:auto;}
+    .block-action-btn{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:0.85rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.1s;}
+    .block-action-btn:hover{background:var(--bg);color:var(--text);}.block-action-btn.del:hover{background:var(--danger-light);color:var(--danger);}
+    .block-body{padding:1rem;}
+    .theory-ta{width:100%;min-height:100px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.7;resize:vertical;outline:none;transition:border-color 0.15s;}
+    .theory-ta:focus{border-color:var(--primary);}
+    .code-lang-row{display:flex;gap:0.65rem;margin-bottom:0.75rem;align-items:center;}
+    .lang-select{padding:0.35rem 0.65rem;border:1.5px solid var(--border);border-radius:7px;font:inherit;font-size:0.8rem;background:var(--card);outline:none;cursor:pointer;}
+    .tryit-toggle{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--muted);margin-left:auto;}
+    .CodeMirror{border-radius:8px;font-family:'JetBrains Mono',monospace!important;font-size:0.85rem!important;line-height:1.6!important;height:auto!important;min-height:120px;}.CodeMirror-scroll{min-height:120px;}
+    .note-type-row{display:flex;gap:0.5rem;margin-bottom:0.75rem;}
+    .note-type-btn{padding:0.3rem 0.75rem;border-radius:6px;border:1.5px solid var(--border);font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;background:transparent;transition:all 0.15s;}
+    .note-type-btn.tip.active{background:var(--warning-light);border-color:var(--warning);color:#92400e;}
+    .note-type-btn.info.active{background:#dbeafe;border-color:#3b82f6;color:#1d4ed8;}
+    .note-type-btn.warning.active{background:var(--danger-light);border-color:var(--danger);color:#991b1b;}
+    /* Exercise */
+    .exercise-builder{display:flex;flex-direction:column;gap:1rem;}
+    .ex-label{font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:0.35rem;}
+    .ex-question-ta{width:100%;min-height:70px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.6;resize:vertical;outline:none;}
+    .ex-question-ta:focus{border-color:var(--primary);}
+    .ex-hint-input{width:100%;padding:0.55rem 0.85rem;border:1.5px solid var(--warning);border-radius:8px;font:inherit;font-size:0.875rem;background:var(--warning-light);color:var(--text);outline:none;}
+    .correct-hint{font-size:0.72rem;color:var(--muted);margin-bottom:0.5rem;}
+    .correct-hint span{color:var(--success);font-weight:600;}
+    .options-list{display:flex;flex-direction:column;gap:0.5rem;}
+    .option-row{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.75rem;background:var(--bg);border-radius:8px;border:1.5px solid var(--border);}
+    .option-row.is-correct{border-color:var(--success);background:var(--success-light);}
+    .opt-letter{width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;color:var(--muted);}
+    .option-row.is-correct .opt-letter{background:var(--success);border-color:var(--success);color:#fff;}
+    .opt-text{flex:1;border:none;background:transparent;font:inherit;font-size:0.875rem;color:var(--text);outline:none;}
+    .opt-text::placeholder{color:#b0bbc8;}
+    .correct-radio{appearance:none;-webkit-appearance:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;position:relative;}
+    .correct-radio:checked{border-color:var(--success);background:var(--success);}
+    .correct-radio:checked::after{content:'✓';position:absolute;color:#fff;font-size:0.65rem;top:50%;left:50%;transform:translate(-50%,-50%);}
+    .btn-remove{width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .btn-remove:hover{background:var(--danger-light);color:var(--danger);}
+    .btn-add-option{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:7px;border:1.5px dashed var(--border);background:transparent;font:inherit;font-size:0.8rem;color:var(--muted);cursor:pointer;transition:border-color 0.15s,color 0.15s;align-self:flex-start;margin-top:0.25rem;}
+    .btn-add-option:hover{border-color:var(--primary);color:var(--primary);}
+    /* Challenge */
+    .challenge-builder{display:flex;flex-direction:column;gap:1.1rem;}
+    .ch-section{display:flex;flex-direction:column;gap:0.4rem;}
+    .ch-label{font-size:0.78rem;font-weight:600;color:var(--text);}
+    .ch-hint-text{font-size:0.7rem;color:var(--muted);}
+    .ch-instructions{width:100%;min-height:80px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.6;resize:vertical;outline:none;}
+    .ch-instructions:focus{border-color:var(--orange);}
+    .expected-ta{width:100%;min-height:60px;padding:0.65rem 0.85rem;border:1.5px solid var(--success);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.6;resize:vertical;outline:none;background:#f0fdf4;color:var(--text);}
+    .match-mode-row{display:flex;gap:0.5rem;}
+    .match-btn{padding:0.3rem 0.85rem;border-radius:6px;border:1.5px solid var(--border);font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;background:transparent;}
+    .match-btn.contains.active{background:#f0fdf4;border-color:var(--success);color:#065f46;}
+    .match-btn.exact.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+    .ch-hint-input{width:100%;padding:0.55rem 0.85rem;border:1.5px solid var(--warning);border-radius:8px;font:inherit;font-size:0.875rem;background:var(--warning-light);color:var(--text);outline:none;}
+    /* Assignment */
+    .assignment-builder{display:flex;flex-direction:column;gap:1.1rem;}
+    .asgn-section{display:flex;flex-direction:column;gap:0.4rem;}
+    .asgn-label{font-size:0.78rem;font-weight:600;color:var(--text);}
+    .asgn-hint{font-size:0.7rem;color:var(--muted);}
+    .asgn-ta{width:100%;min-height:90px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.6;resize:vertical;outline:none;}
+    .asgn-ta:focus{border-color:var(--purple);}
+    .asgn-input{width:100%;padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.875rem;background:var(--card);color:var(--text);outline:none;}
+    .asgn-input:focus{border-color:var(--purple);}
+    .req-list{display:flex;flex-direction:column;gap:0.45rem;}
+    .req-row{display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.75rem;background:var(--bg);border-radius:8px;border:1.5px solid var(--border);}
+    .req-num{width:22px;height:22px;border-radius:50%;background:var(--purple-light);border:1.5px solid #c4b5fd;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:var(--purple);flex-shrink:0;}
+    .req-input{flex:1;border:none;background:transparent;font:inherit;font-size:0.875rem;color:var(--text);outline:none;}
+    .req-input::placeholder{color:#b0bbc8;}
+    .sub-type-row{display:flex;gap:0.5rem;}
+    .sub-type-btn{padding:0.35rem 0.85rem;border-radius:6px;border:1.5px solid var(--border);font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;background:transparent;}
+    .sub-type-btn.code.active{background:#1e1e2e;border-color:#1e1e2e;color:#a5b4fc;}
+    .sub-type-btn.text.active{background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
+    .btn-add-req{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:7px;border:1.5px dashed var(--border);background:transparent;font:inherit;font-size:0.8rem;color:var(--muted);cursor:pointer;align-self:flex-start;margin-top:0.25rem;}
+    .btn-add-req:hover{border-color:var(--purple);color:var(--purple);}
+    /* Add block row */
+    .add-block-row{display:flex;gap:0.65rem;flex-wrap:wrap;padding:1rem;background:var(--card);border-radius:var(--radius);border:2px dashed var(--border);}
+    .add-block-btn{display:flex;align-items:center;gap:0.45rem;padding:0.5rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font:inherit;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+    .add-block-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+    .add-block-btn.ex:hover{border-color:#ec4899;color:#9d174d;background:#fce7f3;}
+    .add-block-btn.ch:hover{border-color:var(--orange);color:#c2410c;background:var(--orange-light);}
+    .add-block-btn.as:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
+    /* Preview */
+    .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;user-select:none;}
+    .preview-bar:hover{background:#f8fafc;}
+    .preview-chevron{font-size:0.75rem;transition:transform 0.2s;}.preview-chevron.open{transform:rotate(180deg);}
+    .preview-frame{background:var(--card);border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--border);border-top:none;padding:1.5rem 2rem;display:none;}
+    .preview-frame.open{display:block;}
+    .preview-lesson-title{font-size:1.8rem;font-weight:700;margin-bottom:1rem;}
+    .preview-theory{font-size:0.95rem;line-height:1.7;margin-bottom:0.65rem;}
+    .preview-code{background:#1e1e2e;color:#cdd6f4;padding:1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.6;overflow-x:auto;margin-bottom:1rem;white-space:pre;}
+    .preview-code-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:0.4rem;}
+    .preview-note{padding:0.85rem 1rem;border-radius:8px;border-left:4px solid;margin-bottom:1rem;font-size:0.88rem;line-height:1.6;}
+    .preview-note.tip{background:var(--warning-light);border-color:var(--warning);}
+    .preview-note.info{background:#dbeafe;border-color:#3b82f6;}
+    .preview-note.warning{background:var(--danger-light);border-color:var(--danger);}
+    .preview-try-btn{display:inline-block;padding:0.5rem 1.2rem;background:#04AA6D;color:#fff;border-radius:6px;font-size:0.875rem;font-weight:600;margin-bottom:1rem;}
+    .preview-exercise{border:2px solid #fce7f3;border-radius:10px;padding:1.1rem;margin-bottom:1rem;}
+    .preview-ex-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9d174d;margin-bottom:0.5rem;}
+    .preview-ex-q{font-size:0.95rem;font-weight:600;margin-bottom:0.75rem;}
+    .preview-option{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:7px;margin-bottom:0.4rem;font-size:0.875rem;}
+    .preview-opt-letter{width:24px;height:24px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;}
+    .preview-hint{font-size:0.75rem;color:#92400e;background:var(--warning-light);padding:0.25rem 0.65rem;border-radius:99px;display:inline-block;margin-top:0.5rem;}
+    .preview-challenge{border:2px solid var(--orange-light);border-radius:10px;padding:1.1rem;margin-bottom:1rem;}
+    .preview-ch-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c2410c;margin-bottom:0.5rem;}
+    .preview-ch-instructions{font-size:0.9rem;margin-bottom:0.75rem;line-height:1.6;}
+    .preview-ch-expected{font-size:0.75rem;color:#065f46;background:var(--success-light);padding:0.4rem 0.75rem;border-radius:6px;margin-bottom:0.5rem;}
+    .preview-assignment{border:2px solid #e9d5ff;border-radius:10px;padding:1.1rem;margin-bottom:1rem;}
+    .preview-as-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--purple);margin-bottom:0.5rem;}
+    .preview-as-title{font-size:1rem;font-weight:700;margin-bottom:0.4rem;}
+    .preview-as-instructions{font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:0.75rem;}
+    .preview-as-req{display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;padding:0.25rem 0;}
+    .preview-as-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:var(--bg);flex-shrink:0;}
+    .preview-as-pts{font-size:0.75rem;color:var(--purple);font-weight:600;background:var(--purple-light);padding:0.2rem 0.6rem;border-radius:99px;margin-top:0.6rem;display:inline-block;}
+    /* Toast */
+    .toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;display:flex;flex-direction:column;gap:0.5rem;}
+    .toast{padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;font-weight:500;color:#fff;box-shadow:var(--shadow-md);animation:slideIn 0.25s ease;}
+    .toast.success{background:#065f46;}.toast.error{background:#7f1d1d;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+    @media(max-width:900px){.editor-layout{flex-direction:column;}.settings-panel{width:100%;position:static;}}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="/teacher-dashboard.html" class="btn-back">← Dashboard</a>
+    <div><div class="topbar-title" id="topbarTitle">Lesson Editor</div><div class="topbar-subtitle" id="topbarSubtitle">New lesson</div></div>
+  </div>
+  <div style="display:flex;gap:0.65rem;">
+    <button class="btn btn-ghost btn-sm" onclick="togglePreview()">👁 Preview</button>
+    <button class="btn btn-primary" id="saveBtn" onclick="saveLesson()">💾 Save Lesson</button>
+  </div>
+</div>
+<div class="editor-layout">
+  <aside class="settings-panel">
+    <div class="panel-card">
+      <div class="panel-header">Lesson Info</div>
+      <div class="panel-body">
+        <div class="form-field"><label class="form-label">Course</label><select class="form-select" id="courseSelect" onchange="loadCourseLessons()"><option value="">— Select course —</option></select></div>
+        <div class="form-field"><label class="form-label">Lesson Title *</label><input class="form-input" id="lessonTitle" type="text" placeholder="e.g. HTML Basic Examples"/></div>
+        <div class="form-field"><label class="form-label">Module Number</label><input class="form-input" id="moduleNumber" type="number" min="1" value="1"/></div>
+        <div class="form-field"><label class="form-label">Order</label><input class="form-input" id="orderNum" type="number" min="1" value="1"/><div class="form-hint">Position in the course lesson list.</div></div>
+        <div class="toggle-row"><span class="toggle-label">Major Assignment</span><label class="toggle"><input type="checkbox" id="isMajor"/><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+    <div class="panel-card" id="existingLessonsCard" style="display:none">
+      <div class="panel-header">Lessons in Course</div>
+      <div class="panel-body" id="existingLessonsList" style="gap:0.4rem"></div>
+    </div>
+  </aside>
+  <div class="content-builder">
+    <div id="emptyMsg" style="text-align:center;padding:3rem 1rem;color:var(--muted);background:var(--card);border-radius:var(--radius);border:2px dashed var(--border)">
+      <div style="font-size:2rem;margin-bottom:0.5rem">📝</div>
+      <div style="font-weight:600;margin-bottom:0.25rem">Start building your lesson</div>
+      <div style="font-size:0.85rem">Add blocks below to create your lesson content</div>
+    </div>
+    <div id="blocksContainer"></div>
+    <div class="add-block-row">
+      <span style="font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;align-self:center">Add Block:</span>
+      <button class="add-block-btn" onclick="addBlock('theory')">📄 Theory</button>
+      <button class="add-block-btn" onclick="addBlock('code')">💻 Code Example</button>
+      <button class="add-block-btn" onclick="addBlock('note')">💡 Note / Tip</button>
+      <button class="add-block-btn" onclick="addBlock('tryit')">▶ Try It</button>
+      <button class="add-block-btn ex" onclick="addBlock('exercise')">📝 Exercise</button>
+      <button class="add-block-btn ch" onclick="addBlock('challenge')">🏆 Challenge</button>
+      <button class="add-block-btn as" onclick="addBlock('assignment')">📋 Assignment</button>
+    </div>
+    <div>
+      <div class="preview-bar" onclick="togglePreview()"><span style="font-size:0.85rem;font-weight:700">👁 Lesson Preview</span><span class="preview-chevron" id="previewChevron">▼</span></div>
+      <div class="preview-frame" id="previewFrame"></div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script>
+let lessonId=null,blocks=[],blockCount=0,cmEditors={},optionCounters={},reqCounters={};
+const LETTERS=['A','B','C','D','E','F'];
+
+async function init(){
+  const me=await fetch('/api/me').then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!me){window.location.href='/login.html';return;}
+  if(me.role!=='teacher'){window.location.href='/dashboard.html';return;}
+  const courses=await fetch('/api/teacher/courses').then(r=>r.json()).catch(()=>[]);
+  const sel=document.getElementById('courseSelect');
+  courses.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.title;sel.appendChild(o);});
+  const p=new URLSearchParams(location.search);
+  const courseId=p.get('courseId'),editId=p.get('lessonId');
+  if(courseId){sel.value=courseId;loadCourseLessons();}
+  if(editId){lessonId=parseInt(editId);await loadExistingLesson(lessonId);}
+}
+
+async function loadExistingLesson(id){
+  const lesson=await fetch('/api/lessons/'+id).then(r=>r.json()).catch(()=>null);
+  if(!lesson)return;
+  document.getElementById('lessonTitle').value=lesson.title||'';
+  document.getElementById('moduleNumber').value=lesson.module_number||1;
+  document.getElementById('orderNum').value=lesson.order_num||1;
+  document.getElementById('isMajor').checked=!!lesson.is_major_assignment;
+  document.getElementById('courseSelect').value=lesson.course_id;
+  document.getElementById('topbarTitle').textContent='Edit Lesson';
+  document.getElementById('topbarSubtitle').textContent=lesson.title;
+  loadCourseLessons();
+  let c={};try{c=JSON.parse(lesson.content||'{}');}catch(_){}
+  (c.blocks||[]).forEach(b=>addBlock(b.type,b));
+}
+
+async function loadCourseLessons(){
+  const cId=document.getElementById('courseSelect').value;
+  const card=document.getElementById('existingLessonsCard'),list=document.getElementById('existingLessonsList');
+  if(!cId){card.style.display='none';return;}
+  const lessons=await fetch('/api/courses/'+cId+'/lessons').then(r=>r.json()).catch(()=>[]);
+  card.style.display=lessons.length?'':'none';
+  list.innerHTML=lessons.map(l=>`<a href="/lesson-editor.html?lessonId=${l.id}&courseId=${cId}" style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;border-radius:7px;text-decoration:none;font-size:0.82rem;color:var(--text);background:${l.id==lessonId?'var(--primary-light)':'transparent'}"><span style="width:20px;height:20px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.65rem;flex-shrink:0">${l.order_num}</span>${esc(l.title)}</a>`).join('');
+}
+
+function addBlock(type,data={}){
+  const id=++blockCount;blocks.push({id,type});
+  document.getElementById('emptyMsg').style.display='none';
+  const el=document.createElement('div');el.id='block-'+id;el.className='block-card';
+  el.innerHTML=buildBlockHTML(id,type,data);
+  document.getElementById('blocksContainer').appendChild(el);
+  if(type==='code')setTimeout(()=>initCM(id,data.lang||'htmlmixed'),50);
+  if(type==='challenge')setTimeout(()=>initChallengeCM(id,data),50);
+  if(type==='exercise')initOptions(id,data.options||[]);
+  if(type==='assignment')initReqList(id,data.requirements||[]);
+}
+
+function blockHeader(id,type,data){
+  const badges={theory:'badge-theory',code:'badge-code',note:'badge-note',tryit:'badge-tryit',exercise:'badge-exercise',challenge:'badge-challenge',assignment:'badge-assignment'};
+  const labels={theory:'📄 Theory',code:'💻 Code',note:'💡 Note',tryit:'▶ Try It',exercise:'📝 Exercise',challenge:'🏆 Challenge',assignment:'📋 Assignment'};
+  return`<div class="block-header"><span class="block-type-badge ${badges[type]}">${labels[type]}</span><input class="block-title-input" id="blabel-${id}" placeholder="Block label (optional)" value="${esc(data.label||'')}"/><div class="block-actions"><button class="block-action-btn" onclick="moveBlock(${id},-1)">↑</button><button class="block-action-btn" onclick="moveBlock(${id},1)">↓</button><button class="block-action-btn del" onclick="deleteBlock(${id})">🗑</button></div></div>`;
+}
+
+function buildBlockHTML(id,type,data){
+  const hdr=blockHeader(id,type,data);
+  if(type==='theory')return hdr+`<div class="block-body"><textarea class="theory-ta" id="bc-${id}" placeholder="Write lesson content. Each new line = one bullet point.">${esc(data.content||'')}</textarea><div style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem">💡 Each line → separate bullet point</div></div>`;
+  if(type==='code'){const lang=data.lang||'htmlmixed';return hdr+`<div class="block-body"><div class="code-lang-row"><label style="font-size:0.78rem;font-weight:600;color:var(--muted)">Language:</label><select class="lang-select" id="blang-${id}" onchange="updateCMLang(${id})"><option value="htmlmixed" ${lang==='htmlmixed'?'selected':''}>HTML</option><option value="javascript" ${lang==='javascript'?'selected':''}>JavaScript</option><option value="css" ${lang==='css'?'selected':''}>CSS</option><option value="text/plain" ${lang==='text/plain'?'selected':''}>Plain Text</option></select><label class="tryit-toggle"><span>Enable "Try it Yourself"</span><label class="toggle" style="margin-left:0.5rem"><input type="checkbox" id="btryit-${id}" ${data.tryit?'checked':''}/><span class="toggle-slider"></span></label></label></div><textarea id="bcm-${id}">${esc(data.code||'')}</textarea></div>`;}
+  if(type==='note'){const nt=data.noteType||'tip';return hdr+`<div class="block-body"><div class="note-type-row"><button class="note-type-btn tip ${nt==='tip'?'active':''}" onclick="setNoteType(${id},'tip')">💡 Tip</button><button class="note-type-btn info ${nt==='info'?'active':''}" onclick="setNoteType(${id},'info')">ℹ Info</button><button class="note-type-btn warning ${nt==='warning'?'active':''}" onclick="setNoteType(${id},'warning')">⚠ Warning</button><input type="hidden" id="bnotetype-${id}" value="${nt}"/></div><textarea class="theory-ta" id="bc-${id}" placeholder="Note text…">${esc(data.content||'')}</textarea></div>`;}
+  if(type==='tryit')return hdr+`<div class="block-body"><p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">Standalone "Try it Yourself" editor for students.</p><textarea class="theory-ta" id="bcm-${id}" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem" placeholder="Optional starter HTML…">${esc(data.code||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div>`;
+  if(type==='exercise')return hdr+`<div class="block-body"><div class="exercise-builder"><div class="form-field"><label class="ex-label">Question *</label><textarea class="ex-question-ta" id="exq-${id}" placeholder="e.g. What does HTML stand for?">${esc(data.question||'')}</textarea></div><div class="form-field"><label class="ex-label">Answer Options</label><div class="correct-hint">Click the <span>circle</span> next to the correct answer.</div><div class="options-list" id="opts-${id}"></div><button class="btn-add-option" onclick="addOption(${id})">＋ Add Option</button></div><div class="form-field"><label class="ex-label">💡 Hint (shown after wrong answer)</label><input class="ex-hint-input" id="exhint-${id}" type="text" placeholder="e.g. Think about what HT means…" value="${esc(data.hint||'')}"/></div></div></div>`;
+  if(type==='challenge'){const mm=data.matchMode||'contains';return hdr+`<div class="block-body"><div class="challenge-builder"><div class="ch-section"><label class="ch-label">Instructions *</label><textarea class="ch-instructions" id="chi-${id}" placeholder="e.g. Create an h1 that says Hello World">${esc(data.instructions||'')}</textarea></div><div class="ch-section"><label class="ch-label">Starter Code</label><textarea id="chta-${id}" style="display:none">${esc(data.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea><div id="chcm-${id}"></div></div><div class="ch-section"><label class="ch-label">Expected Output *</label><div class="ch-hint-text">Text the student's rendered page must contain to pass.</div><textarea class="expected-ta" id="chex-${id}" placeholder="e.g. Hello World">${esc(data.expectedOutput||'')}</textarea></div><div class="ch-section"><label class="ch-label">Match Mode</label><div class="match-mode-row"><button class="match-btn contains ${mm==='contains'?'active':''}" onclick="setMatchMode(${id},'contains')">Contains</button><button class="match-btn exact ${mm==='exact'?'active':''}" onclick="setMatchMode(${id},'exact')">Exact</button><input type="hidden" id="chmm-${id}" value="${mm}"/></div></div><div class="ch-section"><label class="ch-label">💡 Hint</label><input class="ch-hint-input" id="chhint-${id}" type="text" placeholder="Hint shown after failed attempt…" value="${esc(data.hint||'')}"/></div></div></div>`;}
+  if(type==='assignment'){const st=data.submissionType||'code',pts=data.points||100;return hdr+`<div class="block-body"><div class="assignment-builder"><div class="asgn-section"><label class="asgn-label">Assignment Title *</label><input class="asgn-input" id="asgntitle-${id}" type="text" placeholder="e.g. Module 1 Major Assignment" value="${esc(data.assignmentTitle||'')}"/></div><div class="asgn-section"><label class="asgn-label">Instructions *</label><div class="asgn-hint">Describe what the student needs to build and submit.</div><textarea class="asgn-ta" id="asgnins-${id}" placeholder="e.g. Build a complete webpage about your favorite topic…">${esc(data.instructions||'')}</textarea></div><div class="asgn-section"><label class="asgn-label">Requirements Checklist</label><div class="asgn-hint">Each item shows as a checkbox the student sees before submitting.</div><div class="req-list" id="reqlist-${id}" style="margin-top:0.5rem"></div><button class="btn-add-req" onclick="addReq(${id})">＋ Add Requirement</button></div><div style="display:flex;gap:1rem;flex-wrap:wrap"><div class="asgn-section" style="flex:1;min-width:110px"><label class="asgn-label">Points</label><input class="asgn-input" id="asgnpts-${id}" type="number" min="1" value="${pts}"/></div><div class="asgn-section" style="flex:2;min-width:200px"><label class="asgn-label">Submission Type</label><div class="sub-type-row"><button class="sub-type-btn code ${st==='code'?'active':''}" onclick="setSubType(${id},'code')">💻 Code</button><button class="sub-type-btn text ${st==='text'?'active':''}" onclick="setSubType(${id},'text')">📝 Text</button><input type="hidden" id="asgntype-${id}" value="${st}"/></div></div></div></div></div>`;}
+  return hdr;
+}
+
+/* CM helpers */
+function initCM(id,lang){const ta=document.getElementById('bcm-'+id);if(!ta||cmEditors[id])return;cmEditors[id]=CodeMirror.fromTextArea(ta,{mode:lang,theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});}
+function initChallengeCM(id,data){const wrap=document.getElementById('chcm-'+id);if(!wrap||cmEditors['ch-'+id])return;const ta=document.createElement('textarea');ta.id='chcmta-'+id;ta.value=data.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>';wrap.appendChild(ta);cmEditors['ch-'+id]=CodeMirror.fromTextArea(ta,{mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});}
+function updateCMLang(id){if(cmEditors[id])cmEditors[id].setOption('mode',document.getElementById('blang-'+id).value);}
+function setNoteType(id,type){document.getElementById('bnotetype-'+id).value=type;document.querySelectorAll('#block-'+id+' .note-type-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(type))b.classList.add('active');});}
+function setMatchMode(id,mode){document.getElementById('chmm-'+id).value=mode;document.querySelectorAll('#block-'+id+' .match-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(mode))b.classList.add('active');});}
+
+/* Options */
+function initOptions(bId,existing){optionCounters[bId]=0;if(existing.length)existing.forEach(o=>addOption(bId,o));else{addOption(bId);addOption(bId);addOption(bId);}}
+function addOption(bId,data={}){const list=document.getElementById('opts-'+bId);if(!list)return;const idx=++optionCounters[bId];const letter=LETTERS[idx-1]||String(idx);const row=document.createElement('div');row.className='option-row'+(data.correct?' is-correct':'');row.id='opt-'+bId+'-'+idx;row.innerHTML=`<div class="opt-letter">${letter}</div><input class="opt-text" type="text" id="opttext-${bId}-${idx}" placeholder="Option ${letter}…" value="${esc(data.text||'')}"/><input class="correct-radio" type="radio" name="correct-${bId}" id="optcorrect-${bId}-${idx}" value="${idx}" ${data.correct?'checked':''} onchange="markCorrect(${bId},${idx})"/><button class="btn-remove" onclick="removeRow('opt-${bId}-${idx}')">✕</button>`;list.appendChild(row);}
+function markCorrect(bId,cIdx){document.querySelectorAll('#opts-'+bId+' .option-row').forEach(r=>r.classList.remove('is-correct'));document.getElementById('opt-'+bId+'-'+cIdx)?.classList.add('is-correct');}
+
+/* Req list */
+function initReqList(bId,existing){reqCounters[bId]=0;existing.forEach(r=>addReq(bId,r));}
+function addReq(bId,text=''){const list=document.getElementById('reqlist-'+bId);if(!list)return;const idx=++reqCounters[bId];const row=document.createElement('div');row.className='req-row';row.id='req-'+bId+'-'+idx;row.innerHTML=`<div class="req-num">${idx}</div><input class="req-input" type="text" id="reqtext-${bId}-${idx}" placeholder="e.g. DOCTYPE declaration present" value="${esc(typeof text==='string'?text:'')}"/><button class="btn-remove" onclick="removeRow('req-${bId}-${idx}')">✕</button>`;list.appendChild(row);}
+function removeRow(id){document.getElementById(id)?.remove();}
+function setSubType(id,type){document.getElementById('asgntype-'+id).value=type;document.querySelectorAll('#block-'+id+' .sub-type-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(type))b.classList.add('active');});}
+
+function deleteBlock(id){blocks=blocks.filter(b=>b.id!==id);document.getElementById('block-'+id)?.remove();delete cmEditors[id];delete cmEditors['ch-'+id];if(!blocks.length)document.getElementById('emptyMsg').style.display='';}
+function moveBlock(id,dir){const i=blocks.findIndex(b=>b.id===id),j=i+dir;if(j<0||j>=blocks.length)return;[blocks[i],blocks[j]]=[blocks[j],blocks[i]];const c=document.getElementById('blocksContainer');const a=document.getElementById('block-'+blocks[i].id);const b=document.getElementById('block-'+blocks[j].id);if(dir===-1)c.insertBefore(b,a);else c.insertBefore(a,b.nextSibling);}
+
+function collectBlocks(){
+  return [...document.getElementById('blocksContainer').children].map(el=>{
+    const id=parseInt(el.id.replace('block-',''));const block=blocks.find(b=>b.id===id);if(!block)return null;
+    const label=document.getElementById('blabel-'+id)?.value||'';const base={type:block.type,label};
+    if(block.type==='theory')return{...base,content:document.getElementById('bc-'+id)?.value||''};
+    if(block.type==='code')return{...base,lang:document.getElementById('blang-'+id)?.value||'htmlmixed',code:cmEditors[id]?cmEditors[id].getValue():(document.getElementById('bcm-'+id)?.value||''),tryit:document.getElementById('btryit-'+id)?.checked||false};
+    if(block.type==='note')return{...base,noteType:document.getElementById('bnotetype-'+id)?.value||'tip',content:document.getElementById('bc-'+id)?.value||''};
+    if(block.type==='tryit')return{...base,code:document.getElementById('bcm-'+id)?.value||''};
+    if(block.type==='exercise'){const question=document.getElementById('exq-'+id)?.value?.trim()||'';const hint=document.getElementById('exhint-'+id)?.value?.trim()||'';const optList=document.getElementById('opts-'+id);const options=[];if(optList)optList.querySelectorAll('.option-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('opttext-'+id+'-'+idx)?.value?.trim()||'';const radio=document.getElementById('optcorrect-'+id+'-'+idx);if(text)options.push({text,correct:radio?.checked||false});});return{...base,question,hint,options};}
+    if(block.type==='challenge'){const sc=cmEditors['ch-'+id]?cmEditors['ch-'+id].getValue():(document.getElementById('chcmta-'+id)?.value||'');return{...base,instructions:document.getElementById('chi-'+id)?.value?.trim()||'',starterCode:sc,expectedOutput:document.getElementById('chex-'+id)?.value?.trim()||'',matchMode:document.getElementById('chmm-'+id)?.value||'contains',hint:document.getElementById('chhint-'+id)?.value?.trim()||''};}
+    if(block.type==='assignment'){const reqList=document.getElementById('reqlist-'+id);const reqs=[];if(reqList)reqList.querySelectorAll('.req-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('reqtext-'+id+'-'+idx)?.value?.trim()||'';if(text)reqs.push(text);});return{...base,assignmentTitle:document.getElementById('asgntitle-'+id)?.value?.trim()||'',instructions:document.getElementById('asgnins-'+id)?.value?.trim()||'',points:parseInt(document.getElementById('asgnpts-'+id)?.value)||100,submissionType:document.getElementById('asgntype-'+id)?.value||'code',requirements:reqs};}
+    return base;
+  }).filter(Boolean);
+}
+
+async function saveLesson(){
+  const title=document.getElementById('lessonTitle').value.trim();const cId=document.getElementById('courseSelect').value;
+  if(!title){document.getElementById('lessonTitle').style.borderColor='var(--danger)';toast('Please enter a lesson title','error');return;}
+  if(!cId){toast('Please select a course','error');return;}
+  const collected=collectBlocks();
+  for(const b of collected){
+    if(b.type==='exercise'&&(!b.question||b.options.length<2||!b.options.some(o=>o.correct))){toast('An exercise is incomplete','error');return;}
+    if(b.type==='challenge'&&(!b.instructions||!b.expectedOutput)){toast('A challenge is incomplete','error');return;}
+    if(b.type==='assignment'&&(!b.assignmentTitle||!b.instructions)){toast('An assignment is incomplete','error');return;}
+  }
+  const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='💾 Saving…';
+  const payload={title,content:JSON.stringify({blocks:collected}),code_example:collected.find(b=>b.type==='code')?.code||'',module_number:parseInt(document.getElementById('moduleNumber').value)||1,order_num:parseInt(document.getElementById('orderNum').value)||1,is_major_assignment:document.getElementById('isMajor').checked?1:0,description:collected.filter(b=>b.type==='theory').map(b=>b.content).join('\n\n')};
+  try{
+    const isEdit=!!lessonId;const res=await fetch(isEdit?'/api/teacher/lessons/'+lessonId:'/api/courses/'+cId+'/lessons',{method:isEdit?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error(await res.text());
+    const saved=await res.json();
+    if(!isEdit){lessonId=saved.id;history.replaceState({},'','?lessonId='+lessonId+'&courseId='+cId);document.getElementById('topbarTitle').textContent='Edit Lesson';document.getElementById('topbarSubtitle').textContent=title;}
+    loadCourseLessons();toast('✅ Lesson saved!','success');
+  }catch(e){toast('Failed to save: '+e.message,'error');}
+  btn.disabled=false;btn.textContent='💾 Save Lesson';
+}
+
+function togglePreview(){const f=document.getElementById('previewFrame'),ch=document.getElementById('previewChevron');const open=f.classList.toggle('open');ch.classList.toggle('open',open);if(open)buildPreview();}
+function buildPreview(){
+  const f=document.getElementById('previewFrame');const title=document.getElementById('lessonTitle').value||'Lesson Preview';const blist=collectBlocks();
+  let html=`<div class="preview-lesson-title">${esc(title)}</div>`;
+  for(const b of blist){
+    if(b.type==='theory')(b.content||'').split('\n').filter(l=>l.trim()).forEach(l=>html+=`<p class="preview-theory">${esc(l)}</p>`);
+    if(b.type==='code'){if(b.label)html+=`<div class="preview-code-label">${esc(b.label)}</div>`;html+=`<pre class="preview-code">${escHtml(b.code)}</pre>`;if(b.tryit)html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;}
+    if(b.type==='note')html+=`<div class="preview-note ${b.noteType||'tip'}">${esc(b.content)}</div>`;
+    if(b.type==='tryit')html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;
+    if(b.type==='exercise'){const opts=(b.options||[]).map((o,i)=>`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`).join('');html+=`<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise</div><div class="preview-ex-q">${esc(b.question)}</div>${opts}${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;}
+    if(b.type==='challenge')html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div><div class="preview-ch-instructions">${esc(b.instructions)}</div><div class="preview-ch-expected">✅ Must contain: <strong>${esc(b.expectedOutput)}</strong></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
+    if(b.type==='assignment'){const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div><div class="preview-as-instructions">${esc(b.instructions)}</div>${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;}
+  }
+  f.innerHTML=html;
+}
+
+function toast(msg,type='success'){const c=document.getElementById('toastContainer'),el=document.createElement('div');el.className='toast '+type;el.textContent=msg;c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';},2500);setTimeout(()=>el.remove(),2900);}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+init();
+</script>
+</body>
+</html>

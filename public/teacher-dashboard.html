@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LMS – Teacher Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #4f46e5; --primary-hover: #4338ca; --primary-light: #ede9fe;
+      --success: #10b981; --success-hover: #059669; --success-light: #d1fae5;
+      --danger: #ef4444; --danger-hover: #dc2626; --danger-light: #fee2e2;
+      --warning: #f59e0b; --warning-light: #fef3c7;
+      --bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --muted: #64748b; --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 20; box-shadow: var(--shadow);
+    }
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .role-badge {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      background: var(--warning-light); color: var(--warning); border-radius: 99px; padding: 0.2rem 0.65rem;
+    }
+    .welcome-text { font-size: 0.875rem; color: var(--muted); }
+    .welcome-text strong { color: var(--text); font-weight: 600; }
+
+    .btn {
+      padding: 0.5rem 1.1rem; border-radius: 8px; border: none; cursor: pointer;
+      font: inherit; font-size: 0.875rem; font-weight: 500;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover:not(:disabled) { background: var(--success-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
+    .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-outline:hover:not(:disabled) { background: var(--primary-light); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+    .btn-icon { padding: 0.35rem 0.5rem; }
+
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1.25rem 1.4rem; box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 1rem;
+      transition: box-shadow 0.15s;
+    }
+    .stat-card.clickable { cursor: pointer; }
+    .stat-card.clickable:hover { box-shadow: var(--shadow-md); }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .stat-icon.indigo { background: var(--primary-light); }
+    .stat-icon.green  { background: var(--success-light); }
+    .stat-icon.amber  { background: #ffedd5; }
+    .stat-icon.blue   { background: #dbeafe; }
+    .stat-icon.red    { background: var(--danger-light); }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.2rem; font-weight: 500; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .section-title { font-size: 1.05rem; font-weight: 600; }
+
+    .courses-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem; margin-bottom: 2.5rem;
+    }
+    .course-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: box-shadow 0.2s; border: 1px solid var(--border);
+    }
+    .course-card:hover { box-shadow: var(--shadow-md); }
+    .course-header { padding: 1.25rem 1.25rem 1rem; }
+    .course-top-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;
+    }
+    .course-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .course-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--primary-light); color: var(--primary);
+      border-radius: 99px; padding: 0.2rem 0.6rem;
+    }
+    .course-badge.published { background: var(--success-light); color: var(--success); }
+    .course-badge.draft     { background: var(--warning-light); color: var(--warning); }
+    .course-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+    .course-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; line-height: 1.3; }
+    .course-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.85rem; }
+    .course-meta {
+      display: flex; gap: 1rem; font-size: 0.75rem; color: var(--muted);
+      padding-top: 0.75rem; border-top: 1px solid var(--border);
+    }
+    .course-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .lessons-toggle-btn {
+      width: 100%; display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1.25rem; background: none; border: none;
+      border-top: 1px solid var(--border);
+      font: inherit; font-size: 0.8rem; color: var(--muted);
+      cursor: pointer; text-align: left; transition: background 0.1s, color 0.1s;
+      justify-content: space-between;
+    }
+    .lessons-toggle-btn:hover { background: #f8fafc; color: var(--text); }
+    .toggle-arrow { font-size: 0.7rem; transition: transform 0.2s; }
+    .toggle-arrow.open { transform: rotate(90deg); }
+    .lessons-list { border-top: 1px solid var(--border); }
+    .lesson-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--border);
+      font-size: 0.875rem; transition: background 0.1s;
+    }
+    .lesson-item:last-child { border-bottom: none; }
+    .lesson-item:hover { background: #fafbfc; }
+    .lesson-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--bg); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 600; color: var(--muted); flex-shrink: 0;
+    }
+    .lesson-name { flex: 1; line-height: 1.3; }
+    .drag-handle { color: var(--border); cursor: grab; font-size: 1rem; line-height: 1; user-select: none; }
+    .drag-handle:hover { color: var(--muted); }
+
+    .add-lesson-row {
+      display: flex; gap: 0.5rem; padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border); background: #fafbfc;
+    }
+    .add-lesson-row input {
+      flex: 1; padding: 0.4rem 0.65rem; border: 1.5px solid var(--border);
+      border-radius: 7px; font: inherit; font-size: 0.8rem;
+      background: var(--card); color: var(--text); outline: none;
+      transition: border-color 0.15s;
+    }
+    .add-lesson-row input:focus { border-color: var(--primary); }
+    .add-lesson-row input::placeholder { color: #b0bbc8; }
+
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+    .loading-row { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.875rem; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center;
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--card); border-radius: 16px; box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 480px; margin: 1rem;
+      transform: translateY(16px) scale(0.98); transition: transform 0.2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 700; }
+    .modal-close {
+      width: 30px; height: 30px; border-radius: 8px; border: none;
+      background: var(--bg); cursor: pointer; font-size: 1rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.1s, color 0.1s;
+    }
+    .modal-close:hover { background: var(--border); color: var(--text); }
+    .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .form-hint  { font-size: 0.73rem; color: var(--muted); margin-top: 0.15rem; }
+    .form-input, .form-textarea, .form-select {
+      padding: 0.55rem 0.85rem; border: 1.5px solid var(--border); border-radius: 8px;
+      font: inherit; font-size: 0.875rem; background: var(--card); color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s; outline: none; width: 100%;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .modal-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 0.65rem;
+    }
+
+    .toast-container {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.5rem; z-index: 200;
+    }
+    .toast {
+      background: var(--text); color: #fff; padding: 0.7rem 1rem;
+      border-radius: 10px; font-size: 0.85rem; box-shadow: var(--shadow-md);
+      display: flex; align-items: center; gap: 0.5rem;
+      animation: slideIn 0.25s ease; max-width: 320px;
+    }
+    .toast.success { background: #065f46; }
+    .toast.error   { background: #7f1d1d; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 0 1rem; }
+      .welcome-text { display: none; }
+      main { padding: 0 1rem; margin: 1.25rem auto; }
+      .courses-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎓 MyLMS</div>
+  <div class="header-right">
+    <span class="role-badge">Teacher</span>
+    <span class="welcome-text">Welcome back, <strong id="userName">—</strong></span>
+    <a href="/submissions.html" class="btn btn-ghost btn-sm" style="text-decoration:none;position:relative;" id="submissionsBtn">
+      📋 Submissions
+      <span id="pendingBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.65rem;font-weight:700;min-width:18px;height:18px;border-radius:99px;align-items:center;justify-content:center;padding:0 4px;"></span>
+    </a>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon indigo">📚</div>
+      <div>
+        <div class="stat-label">Total Courses</div>
+        <div class="stat-value" id="statCourses">—</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div>
+        <div class="stat-label">Total Lessons</div>
+        <div class="stat-value" id="statLessons">—</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">👥</div>
+      <div>
+        <div class="stat-label">Enrolled Students</div>
+        <div class="stat-value" id="statStudents">—</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber">📋</div>
+      <div>
+        <div class="stat-label">Drafts</div>
+        <div class="stat-value" id="statDrafts">—</div>
+      </div>
+    </div>
+    <div class="stat-card clickable" onclick="location.href='/submissions.html'"
+         style="border:1.5px solid transparent;transition:border-color 0.15s,box-shadow 0.15s;"
+         onmouseenter="this.style.borderColor='#ef4444'" onmouseleave="this.style.borderColor='transparent'">
+      <div class="stat-icon red">⏳</div>
+      <div>
+        <div class="stat-label">Pending Reviews</div>
+        <div class="stat-value" id="statPending">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">My Courses</div>
+    <button class="btn btn-primary btn-sm" onclick="openCourseModal()">
+      <span>＋</span> New Course
+    </button>
+  </div>
+  <div class="courses-grid" id="coursesGrid">
+    <div class="loading-row">Loading your courses…</div>
+  </div>
+</main>
+
+<!-- Course Modal -->
+<div class="modal-overlay" id="courseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="courseModalTitle">New Course</div>
+      <button class="modal-close" onclick="closeModal('courseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="courseId" value="" />
+      <div class="form-field">
+        <label class="form-label" for="courseTitle">Course Title <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="courseTitle" type="text" placeholder="e.g. Introduction to Web Development" />
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="courseDesc">Description</label>
+        <textarea class="form-textarea" id="courseDesc" placeholder="Brief overview of what students will learn…"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="courseStatus">Status</label>
+        <select class="form-select" id="courseStatus">
+          <option value="draft">Draft — not visible to students</option>
+          <option value="published">Published — visible to students</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('courseModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveCourseBtn" onclick="saveCourse()">Create Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lesson Modal -->
+<div class="modal-overlay" id="lessonModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="lessonModalTitle">Add Lesson</div>
+      <button class="modal-close" onclick="closeModal('lessonModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="lessonId" value="" />
+      <input type="hidden" id="lessonCourseId" value="" />
+      <div class="form-field">
+        <label class="form-label" for="lessonTitle">Lesson Title <span style="color:var(--danger)">*</span></label>
+        <input class="form-input" id="lessonTitle" type="text" placeholder="e.g. What is HTML?" />
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="lessonDesc">Description / Notes</label>
+        <textarea class="form-textarea" id="lessonDesc" placeholder="Optional description or notes…"></textarea>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="lessonDuration">Duration (minutes)</label>
+        <input class="form-input" id="lessonDuration" type="number" min="1" placeholder="e.g. 15" />
+        <div class="form-hint">Optional — shown to students as estimated time.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('lessonModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveLessonBtn" onclick="saveLesson()">Add Lesson</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  let courses = [];
+
+  async function init() {
+    try {
+      const res = await fetch('/api/me');
+      if (!res.ok) { window.location.href = '/login.html'; return; }
+      const user = await res.json();
+      document.getElementById('userName').textContent = user.name;
+      await loadCourses();
+    } catch {
+      loadMockData();
+    }
+  }
+
+  async function logout() {
+    await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+    window.location.href = '/login.html';
+  }
+
+  async function loadCourses() {
+    try {
+      const [myCourses, studentsRes, pendingRes] = await Promise.all([
+        fetch('/api/teacher/courses').then(r => r.json()),
+        fetch('/api/teacher/stats').then(r => r.json()).catch(() => ({ students: 0 })),
+        fetch('/api/teacher/major-assignments?filter=pending').then(r => r.json()).catch(() => [])
+      ]);
+
+      courses = await Promise.all(
+        myCourses.map(async c => {
+          const lessons = await fetch(`/api/courses/${c.id}/lessons`).then(r => r.json()).catch(() => []);
+          return { ...c, lessons };
+        })
+      );
+
+      renderAll(studentsRes.students ?? 0, pendingRes.length ?? 0);
+    } catch {
+      loadMockData();
+    }
+  }
+
+  function loadMockData() {
+    document.getElementById('userName').textContent = 'Ms. Garcia';
+    courses = [
+      {
+        id: 1, title: 'Introduction to Web Development',
+        description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build your first websites.',
+        status: 'published', students: 24,
+        lessons: [
+          { id: 1, order_num: 1, title: 'What is the Web?', duration: 10, description: '' },
+          { id: 2, order_num: 2, title: 'HTML Basics', duration: 20, description: '' },
+          { id: 3, order_num: 3, title: 'Styling with CSS', duration: 25, description: '' },
+          { id: 4, order_num: 4, title: 'JavaScript Fundamentals', duration: 30, description: '' },
+        ]
+      },
+      {
+        id: 2, title: 'Python for Beginners',
+        description: 'A hands-on introduction to Python programming for absolute beginners.',
+        status: 'published', students: 18,
+        lessons: [
+          { id: 5, order_num: 1, title: 'Setting Up Python', duration: 10, description: '' },
+          { id: 6, order_num: 2, title: 'Variables & Data Types', duration: 20, description: '' },
+          { id: 7, order_num: 3, title: 'Control Flow', duration: 25, description: '' },
+        ]
+      },
+      {
+        id: 3, title: 'Advanced CSS & Animations',
+        description: 'Deep-dive into CSS Grid, Flexbox, and keyframe animations.',
+        status: 'draft', students: 0, lessons: []
+      }
+    ];
+    renderAll(42, 0);
+  }
+
+  function renderAll(totalStudents, pendingCount = 0) {
+    const grid = document.getElementById('coursesGrid');
+    const totalLessons = courses.reduce((s, c) => s + c.lessons.length, 0);
+    const drafts = courses.filter(c => c.status === 'draft').length;
+    const students = totalStudents ?? courses.reduce((s, c) => s + (c.students || 0), 0);
+
+    document.getElementById('statCourses').textContent = courses.length;
+    document.getElementById('statLessons').textContent = totalLessons;
+    document.getElementById('statStudents').textContent = students;
+    document.getElementById('statDrafts').textContent = drafts;
+    document.getElementById('statPending').textContent = pendingCount;
+
+    // Badge on Submissions button
+    const badge = document.getElementById('pendingBadge');
+    if (badge) {
+      if (pendingCount > 0) {
+        badge.textContent = pendingCount;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (!courses.length) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>No courses yet.<br>Click <strong>New Course</strong> to create your first one.</p>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = courses.map(buildCourseCard).join('');
+  }
+
+  function buildCourseCard(course) {
+    const isPublished = course.status === 'published';
+    const lessonCount = course.lessons.length;
+
+    const lessonsHtml = lessonCount
+      ? course.lessons.map((l, i) => buildLessonRow(l, course.id, i + 1)).join('')
+      : `<div class="lesson-item" style="color:var(--muted);font-size:0.82rem;justify-content:center;padding:1rem">
+           No lessons yet — add one below.
+         </div>`;
+
+    return `
+      <div class="course-card" id="card-${course.id}">
+        <div class="course-header">
+          <div class="course-top-row">
+            <div class="course-badges">
+              <span class="course-badge ${isPublished ? 'published' : 'draft'}">
+                ${isPublished ? '🟢 Published' : '🟡 Draft'}
+              </span>
+            </div>
+            <div class="course-actions">
+              <button class="btn btn-ghost btn-sm btn-icon" title="Edit course"
+                      onclick="openCourseModal(${course.id})">✏️</button>
+              <button class="btn btn-ghost btn-sm btn-icon" title="Delete course"
+                      onclick="confirmDeleteCourse(${course.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="course-title">${esc(course.title)}</div>
+          ${course.description ? `<div class="course-desc">${esc(course.description)}</div>` : ''}
+          <div class="course-meta">
+            <span>📖 ${lessonCount} lesson${lessonCount !== 1 ? 's' : ''}</span>
+            ${course.students != null ? `<span>👥 ${course.students} student${course.students !== 1 ? 's' : ''}</span>` : ''}
+          </div>
+        </div>
+
+        <button class="lessons-toggle-btn" onclick="toggleLessons(${course.id}, this)">
+          <span style="display:flex;align-items:center;gap:0.5rem">
+            <span class="toggle-arrow" id="arrow-${course.id}">▶</span>
+            Lessons
+          </span>
+          <span style="font-size:0.75rem;opacity:0.7">${lessonCount > 0 ? 'Click to manage' : 'None yet'}</span>
+        </button>
+
+        <div class="lessons-list" id="lessons-${course.id}" style="display:none">
+          <div id="lesson-rows-${course.id}">${lessonsHtml}</div>
+          <div class="add-lesson-row">
+            <button class="btn btn-ghost btn-sm" onclick="location.href='/lesson-editor.html?courseId=${course.id}'">+ New Lesson</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function buildLessonRow(lesson, courseId, num) {
+    return `
+      <div class="lesson-item" id="lesson-item-${lesson.id}">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+        <div class="lesson-num">${num}</div>
+        <span class="lesson-name">${esc(lesson.title)}</span>
+        ${lesson.duration ? `<span style="font-size:0.72rem;color:var(--muted);white-space:nowrap">${lesson.duration}m</span>` : ''}
+        <div style="display:flex;gap:0.35rem;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm btn-icon" title="Edit lesson"
+                  onclick="location.href='/lesson-editor.html?lessonId=${lesson.id}&courseId=${courseId}'">✏️</button>
+          <button class="btn btn-ghost btn-sm btn-icon" title="Delete lesson"
+                  onclick="deleteLesson(${lesson.id}, ${courseId})">🗑️</button>
+        </div>
+      </div>`;
+  }
+
+  function toggleLessons(courseId, btn) {
+    const list = document.getElementById(`lessons-${courseId}`);
+    const arrow = document.getElementById(`arrow-${courseId}`);
+    const isOpen = list.style.display !== 'none';
+    list.style.display = isOpen ? 'none' : '';
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  function openCourseModal(courseId = null) {
+    document.getElementById('courseId').value = courseId ?? '';
+    document.getElementById('courseTitle').value = '';
+    document.getElementById('courseDesc').value = '';
+    document.getElementById('courseStatus').value = 'draft';
+
+    if (courseId) {
+      const course = courses.find(c => c.id === courseId);
+      if (course) {
+        document.getElementById('courseTitle').value = course.title;
+        document.getElementById('courseDesc').value = course.description || '';
+        document.getElementById('courseStatus').value = course.status || 'draft';
+      }
+      document.getElementById('courseModalTitle').textContent = 'Edit Course';
+      document.getElementById('saveCourseBtn').textContent = 'Save Changes';
+    } else {
+      document.getElementById('courseModalTitle').textContent = 'New Course';
+      document.getElementById('saveCourseBtn').textContent = 'Create Course';
+    }
+
+    openModal('courseModal');
+    setTimeout(() => document.getElementById('courseTitle').focus(), 150);
+  }
+
+  async function saveCourse() {
+    const btn = document.getElementById('saveCourseBtn');
+    const id = document.getElementById('courseId').value;
+    const title = document.getElementById('courseTitle').value.trim();
+    const description = document.getElementById('courseDesc').value.trim();
+    const status = document.getElementById('courseStatus').value;
+
+    if (!title) {
+      const el = document.getElementById('courseTitle');
+      el.focus(); el.style.borderColor = 'var(--danger)';
+      setTimeout(() => el.style.borderColor = '', 1500);
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const payload = { title, description, status };
+    const isEdit = !!id;
+
+    try {
+      const res = await fetch(
+        isEdit ? `/api/teacher/courses/${id}` : '/api/teacher/courses',
+        { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      );
+      if (!res.ok) throw new Error();
+      const saved = await res.json();
+      if (isEdit) {
+        const idx = courses.findIndex(c => c.id == saved.id);
+        if (idx >= 0) courses[idx] = { ...courses[idx], ...saved };
+      } else {
+        courses.push({ ...saved, lessons: [] });
+      }
+      renderAll(); toast(isEdit ? '✅ Course updated' : '✅ Course created', 'success');
+    } catch {
+      if (isEdit) {
+        const idx = courses.findIndex(c => c.id == id);
+        if (idx >= 0) courses[idx] = { ...courses[idx], title, description, status };
+      } else {
+        courses.push({ id: Date.now(), title, description, status, students: 0, lessons: [] });
+      }
+      renderAll(); toast(isEdit ? '✅ Course updated' : '✅ Course created', 'success');
+    }
+
+    closeModal('courseModal');
+    btn.disabled = false;
+  }
+
+  function confirmDeleteCourse(courseId) {
+    if (!confirm('Delete this course? This will also remove all its lessons.')) return;
+    deleteCourse(courseId);
+  }
+
+  async function deleteCourse(courseId) {
+    try { await fetch(`/api/teacher/courses/${courseId}`, { method: 'DELETE' }); } catch {}
+    courses = courses.filter(c => c.id !== courseId);
+    renderAll(); toast('🗑️ Course deleted', 'success');
+  }
+
+  function openLessonModal(courseId, lessonId = null) {
+    document.getElementById('lessonCourseId').value = courseId;
+    document.getElementById('lessonId').value = lessonId ?? '';
+    document.getElementById('lessonTitle').value = '';
+    document.getElementById('lessonDesc').value = '';
+    document.getElementById('lessonDuration').value = '';
+
+    if (lessonId) {
+      const course = courses.find(c => c.id === courseId);
+      const lesson = course?.lessons.find(l => l.id === lessonId);
+      if (lesson) {
+        document.getElementById('lessonTitle').value = lesson.title;
+        document.getElementById('lessonDesc').value = lesson.description || '';
+        document.getElementById('lessonDuration').value = lesson.duration || '';
+      }
+      document.getElementById('lessonModalTitle').textContent = 'Edit Lesson';
+      document.getElementById('saveLessonBtn').textContent = 'Save Changes';
+    } else {
+      document.getElementById('lessonModalTitle').textContent = 'Add Lesson';
+      document.getElementById('saveLessonBtn').textContent = 'Add Lesson';
+    }
+
+    openModal('lessonModal');
+    setTimeout(() => document.getElementById('lessonTitle').focus(), 150);
+  }
+
+  async function saveLesson() {
+    const btn = document.getElementById('saveLessonBtn');
+    const courseId = parseInt(document.getElementById('lessonCourseId').value);
+    const lessonId = document.getElementById('lessonId').value;
+    const title = document.getElementById('lessonTitle').value.trim();
+    const description = document.getElementById('lessonDesc').value.trim();
+    const duration = parseInt(document.getElementById('lessonDuration').value) || null;
+
+    if (!title) {
+      const el = document.getElementById('lessonTitle');
+      el.focus(); el.style.borderColor = 'var(--danger)';
+      setTimeout(() => el.style.borderColor = '', 1500);
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const isEdit = !!lessonId;
+
+    try {
+      const res = await fetch(
+        isEdit ? `/api/teacher/lessons/${lessonId}` : `/api/courses/${courseId}/lessons`,
+        { method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description, duration }) }
+      );
+      if (!res.ok) throw new Error();
+      const saved = await res.json();
+      const course = courses.find(c => c.id === courseId);
+      if (course) {
+        if (isEdit) {
+          const idx = course.lessons.findIndex(l => l.id == saved.id);
+          if (idx >= 0) course.lessons[idx] = { ...course.lessons[idx], ...saved };
+        } else {
+          course.lessons.push({ ...saved, order_num: course.lessons.length + 1 });
+        }
+        refreshCourseCard(courseId);
+        toast(isEdit ? '✅ Lesson updated' : '✅ Lesson added', 'success');
+      }
+    } catch {
+      const course = courses.find(c => c.id === courseId);
+      if (course) {
+        if (isEdit) {
+          const idx = course.lessons.findIndex(l => l.id == lessonId);
+          if (idx >= 0) course.lessons[idx] = { ...course.lessons[idx], title, description, duration };
+        } else {
+          course.lessons.push({ id: Date.now(), title, description, duration, order_num: course.lessons.length + 1 });
+        }
+        refreshCourseCard(courseId);
+        toast(isEdit ? '✅ Lesson updated' : '✅ Lesson added', 'success');
+      }
+    }
+
+    closeModal('lessonModal');
+    btn.disabled = false;
+  }
+
+  async function deleteLesson(lessonId, courseId) {
+    if (!confirm('Delete this lesson?')) return;
+    try { await fetch(`/api/teacher/lessons/${lessonId}`, { method: 'DELETE' }); } catch {}
+    const course = courses.find(c => c.id === courseId);
+    if (course) {
+      course.lessons = course.lessons.filter(l => l.id !== lessonId);
+      course.lessons.forEach((l, i) => l.order_num = i + 1);
+      refreshCourseCard(courseId);
+      toast('🗑️ Lesson deleted', 'success');
+    }
+  }
+
+  function refreshCourseCard(courseId) {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+    const cardEl = document.getElementById(`card-${courseId}`);
+    if (cardEl) {
+      const wasOpen = document.getElementById(`lessons-${courseId}`)?.style.display !== 'none';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = buildCourseCard(course);
+      cardEl.replaceWith(tmp.firstElementChild);
+      if (wasOpen) {
+        const list = document.getElementById(`lessons-${courseId}`);
+        const arrow = document.getElementById(`arrow-${courseId}`);
+        if (list) list.style.display = '';
+        if (arrow) arrow.classList.add('open');
+      }
+    }
+    const totalLessons = courses.reduce((s, c) => s + c.lessons.length, 0);
+    const drafts = courses.filter(c => c.status === 'draft').length;
+    document.getElementById('statLessons').textContent = totalLessons;
+    document.getElementById('statDrafts').textContent = drafts;
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  });
+
+  function toast(message, type = 'default') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`; el.textContent = message;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; }, 2500);
+    setTimeout(() => el.remove(), 2900);
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LMS — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .brand-icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .brand-tagline {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .tab-row {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.75rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.55rem;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group { margin-bottom: 1.1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.65rem 0.875rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #f8fafc;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 0.8rem;
+      margin: -0.4rem 0 0.9rem;
+      min-height: 1.1rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 0.25rem;
+    }
+
+    .btn-submit:hover { background: var(--primary-hover); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .divider {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 1.25rem 0;
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .success-msg {
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">
+    <span class="brand-icon">🎓</span>
+    <div class="brand-name">MyLMS</div>
+    <div class="brand-tagline">Your learning journey starts here</div>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div class="success-msg" id="successMsg"></div>
+
+  <!-- Login form -->
+  <div id="loginPanel">
+    <div class="form-group">
+      <label for="loginEmail">Email address</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com"
+             onkeydown="if(event.key==='Enter') login()" />
+    </div>
+    <div class="form-group">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') login()" />
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <button class="btn-submit" id="loginBtn" onclick="login()">Sign In</button>
+  </div>
+
+  <!-- Register form -->
+  <div id="registerPanel" style="display:none">
+    <div class="form-group">
+      <label for="regName">Full name</label>
+      <input type="text" id="regName" placeholder="Jane Smith"
+             onkeydown="if(event.key==='Enter') register()" />
+    </div>
+    <div class="form-group">
+      <label for="regEmail">Email address</label>
+      <input type="email" id="regEmail" placeholder="you@example.com"
+             onkeydown="if(event.key==='Enter') register()" />
+    </div>
+    <div class="form-group">
+      <label for="regPassword">Password</label>
+      <input type="password" id="regPassword" placeholder="Min. 6 characters"
+             onkeydown="if(event.key==='Enter') register()" />
+    </div>
+    <div class="error-msg" id="registerError"></div>
+    <button class="btn-submit" id="registerBtn" onclick="register()">Create Account</button>
+  </div>
+</div>
+
+<script>
+  // ── Redirect helper ──────────────────────────────────────────
+  function redirectByRole(role) {
+    window.location.href = role === 'teacher' ? '/teacher-dashboard.html' : '/dashboard.html';
+  }
+
+  // If already authenticated, skip straight to the right dashboard
+  fetch('/api/me').then(async r => {
+    if (r.ok) {
+      const user = await r.json();
+      redirectByRole(user.role);
+    }
+  });
+
+  // ── Tab switching ────────────────────────────────────────────
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginPanel').style.display    = isLogin ? '' : 'none';
+    document.getElementById('registerPanel').style.display = isLogin ? 'none' : '';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+    document.getElementById('loginError').textContent    = '';
+    document.getElementById('registerError').textContent = '';
+    document.getElementById('successMsg').style.display  = 'none';
+  }
+
+  // ── Login ────────────────────────────────────────────────────
+  async function login() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl    = document.getElementById('loginError');
+    const btn      = document.getElementById('loginBtn');
+
+    errEl.textContent = '';
+    if (!email || !password) { errEl.textContent = 'Please fill in both fields.'; return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Signing in…';
+
+    try {
+      const res = await fetch('/api/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) {
+        errEl.textContent = 'Invalid email or password.';
+        btn.disabled    = false;
+        btn.textContent = 'Sign In';
+        return;
+      }
+
+      const { role } = await res.json();  // server returns { success, role }
+      redirectByRole(role);
+
+    } catch {
+      errEl.textContent = 'Network error. Please try again.';
+      btn.disabled    = false;
+      btn.textContent = 'Sign In';
+    }
+  }
+
+  // ── Register ─────────────────────────────────────────────────
+  async function register() {
+    const name     = document.getElementById('regName').value.trim();
+    const email    = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errEl    = document.getElementById('registerError');
+    const btn      = document.getElementById('registerBtn');
+
+    errEl.textContent = '';
+    if (!name || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+    if (password.length < 6)          { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      const res = await fetch('/api/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, password })
+      });
+
+      if (!res.ok) {
+        errEl.textContent = 'Registration failed. That email may already be in use.';
+        btn.disabled    = false;
+        btn.textContent = 'Create Account';
+        return;
+      }
+
+      // Auto-login after registration
+      document.getElementById('loginEmail').value    = email;
+      document.getElementById('loginPassword').value = password;
+      const successEl = document.getElementById('successMsg');
+      successEl.textContent    = `Account created! Signing you in, ${name}…`;
+      successEl.style.display  = 'block';
+      switchTab('login');
+      setTimeout(login, 800);
+
+    } catch {
+      errEl.textContent = 'Network error. Please try again.';
+      btn.disabled    = false;
+      btn.textContent = 'Create Account';
+    }
+  }
+</script>
+</body>
+</html>

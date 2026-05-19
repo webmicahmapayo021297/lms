@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submissions — MyLMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--primary:#4f46e5;--primary-hover:#4338ca;--primary-light:#ede9fe;--success:#10b981;--success-light:#d1fae5;--danger:#ef4444;--danger-light:#fee2e2;--warning:#f59e0b;--warning-light:#fef3c7;--purple:#7c3aed;--purple-light:#f5f3ff;--bg:#f1f5f9;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 12px rgba(0,0,0,0.1);}
+    *{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+    .btn-back{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;font:inherit;font-size:0.82rem;color:var(--muted);cursor:pointer;text-decoration:none;}
+    .btn-back:hover{background:var(--border);color:var(--text);}
+    .page-title{font-size:0.95rem;font-weight:700;}
+    .btn{padding:0.5rem 1.1rem;border-radius:8px;border:none;cursor:pointer;font:inherit;font-size:0.875rem;font-weight:500;display:inline-flex;align-items:center;gap:0.4rem;transition:background 0.15s,transform 0.1s;}
+    .btn:active{transform:scale(0.97);}.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .btn-success{background:var(--success);color:#fff;}.btn-success:hover:not(:disabled){background:#059669;}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}.btn-ghost:hover{background:var(--bg);}
+    .content{max-width:1300px;margin:0 auto;padding:1.5rem;}
+    .filter-bar{display:flex;gap:0.5rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+    .filter-btn{padding:0.4rem 0.9rem;border-radius:7px;border:1.5px solid var(--border);font:inherit;font-size:0.82rem;font-weight:500;background:var(--card);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+    .filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .layout{display:flex;gap:1.5rem;align-items:flex-start;}
+    .sub-list{width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:0.65rem;}
+    .sub-item{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:0.9rem 1.1rem;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s,box-shadow 0.15s;}
+    .sub-item:hover{box-shadow:var(--shadow-md);}.sub-item.active{border-color:var(--primary);}
+    .sub-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;}
+    .sub-student{font-size:0.875rem;font-weight:600;}
+    .sub-dot{width:8px;height:8px;border-radius:50%;}
+    .dot-pending{background:#f59e0b;}.dot-revision{background:#ef4444;}.dot-passed{background:#10b981;}
+    .sub-assignment{font-size:0.78rem;color:var(--muted);margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sub-bottom{display:flex;justify-content:space-between;}
+    .sub-course{font-size:0.72rem;color:#b0b8c8;}.sub-time{font-size:0.72rem;color:var(--muted);}
+    .resub-badge{font-size:0.68rem;background:var(--danger-light);color:var(--danger);padding:0.1rem 0.45rem;border-radius:99px;font-weight:600;}
+    .review-panel{flex:1;min-width:0;}
+    .review-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .review-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+    .review-student{font-size:1.1rem;font-weight:700;}
+    .review-meta{font-size:0.82rem;color:var(--muted);margin-top:0.2rem;line-height:1.6;}
+    .status-badge{font-size:0.75rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:99px;white-space:nowrap;}
+    .sb-pending{background:var(--warning-light);color:#92400e;}.sb-revision{background:var(--danger-light);color:#991b1b;}.sb-passed{background:var(--success-light);color:#065f46;}
+    .review-body{padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;}
+    .section-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:0.65rem;}
+    .code-display{background:#1e1e2e;border-radius:10px;padding:1.1rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.6;color:#cdd6f4;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;}
+    .text-display{background:var(--bg);border-radius:10px;padding:1.1rem;font-size:0.9rem;line-height:1.7;max-height:400px;overflow-y:auto;white-space:pre-wrap;}
+    .req-grade-item{display:flex;align-items:center;gap:0.75rem;padding:0.55rem 0.75rem;border-radius:8px;background:var(--bg);margin-bottom:0.4rem;font-size:0.875rem;}
+    .req-check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);background:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;transition:all 0.15s;}
+    .req-check.checked{background:var(--success);border-color:var(--success);color:#fff;}
+    .feedback-ta{width:100%;min-height:100px;padding:0.75rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.6;resize:vertical;outline:none;}
+    .feedback-ta:focus{border-color:var(--purple);}
+    .score-row{display:flex;align-items:center;gap:0.75rem;margin-top:0.75rem;}
+    .score-input{width:80px;padding:0.5rem 0.75rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;text-align:center;outline:none;}
+    .score-input:focus{border-color:var(--purple);}
+    .action-row{display:flex;gap:0.75rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap;}
+    .empty-state{text-align:center;padding:4rem 2rem;color:var(--muted);}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:0.75rem;}
+    .no-items{text-align:center;padding:2rem;color:var(--muted);font-size:0.875rem;}
+    .toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;display:flex;flex-direction:column;gap:0.5rem;}
+    .toast{padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;font-weight:500;color:#fff;box-shadow:var(--shadow-md);animation:slideIn 0.25s ease;}
+    .toast.success{background:#065f46;}.toast.error{background:#7f1d1d;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+    @media(max-width:900px){.layout{flex-direction:column;}.sub-list{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <a href="/teacher-dashboard.html" class="btn-back">← Dashboard</a>
+    <div class="page-title">📋 Submissions</div>
+  </div>
+  <span id="topUser" style="font-size:0.82rem;color:var(--muted)"></span>
+</div>
+
+<div class="content">
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('pending',this)">⏳ Pending</button>
+    <button class="filter-btn" onclick="setFilter('needs_revision',this)">↩ Needs Revision</button>
+    <button class="filter-btn" onclick="setFilter('passed',this)">✅ Passed</button>
+    <button class="filter-btn" onclick="setFilter('all',this)">All</button>
+  </div>
+  <div class="layout">
+    <div class="sub-list" id="subList"><div class="no-items">Loading…</div></div>
+    <div class="review-panel" id="reviewPanel">
+      <div class="review-card">
+        <div class="empty-state"><div class="icon">📋</div><p>Select a submission to review it.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+let submissions=[], currentFilter='pending', currentSub=null, reqGrades={};
+
+async function init(){
+  const me=await fetch('/api/me').then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!me){window.location.href='/login.html';return;}
+  if(me.role!=='teacher'){window.location.href='/dashboard.html';return;}
+  document.getElementById('topUser').textContent=me.name;
+  await loadSubmissions();
+}
+
+async function loadSubmissions(){
+  try{submissions=await fetch('/api/teacher/major-assignments?filter=all').then(r=>r.json());}catch{submissions=[];}
+  renderList();
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderList();
+}
+
+function renderList(){
+  const list=document.getElementById('subList');
+  let filtered=submissions;
+  if(currentFilter!=='all')filtered=submissions.filter(s=>s.status===currentFilter);
+  if(!filtered.length){list.innerHTML='<div class="no-items">No '+( currentFilter==='all'?'':currentFilter.replace('_',' '))+' submissions.</div>';return;}
+  list.innerHTML=filtered.map(s=>{
+    const dotClass=s.status==='passed'?'dot-passed':s.status==='needs_revision'?'dot-revision':'dot-pending';
+    return`<div class="sub-item ${currentSub?.id===s.id?'active':''}" onclick="openSub(${s.id})">
+      <div class="sub-item-top">
+        <span class="sub-student">${esc(s.student_name)}</span>
+        <div style="display:flex;align-items:center;gap:0.4rem">${s.resubmission_count>0?`<span class="resub-badge">↩ ${s.resubmission_count}x</span>`:''}<div class="sub-dot ${dotClass}"></div></div>
+      </div>
+      <div class="sub-assignment">${esc(s.assignment_title||'Assignment')}</div>
+      <div class="sub-bottom"><span class="sub-course">${esc(s.course_title||'')}</span><span class="sub-time">${timeAgo(s.submitted_at)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function openSub(id){
+  currentSub=submissions.find(s=>s.id===id);if(!currentSub)return;
+  reqGrades={};
+  // Pre-fill existing grades
+  let g=[];try{g=JSON.parse(currentSub.requirement_grades||'[]');}catch(_){}
+  g.forEach((v,i)=>{if(v)reqGrades[i]=true;});
+  renderList();renderReview();
+}
+
+function renderReview(){
+  const s=currentSub;if(!s)return;
+  let reqs=[];try{reqs=JSON.parse(s.requirements||'[]');}catch(_){}
+  const isCode=(s.submission_type||'code')==='code';
+  const statusLabel=s.status==='passed'?'Passed':s.status==='needs_revision'?'Needs Revision':'Pending Review';
+  const statusClass=s.status==='passed'?'sb-passed':s.status==='needs_revision'?'sb-revision':'sb-pending';
+
+  const reqsHTML=reqs.length?`<div><div class="section-title">Requirements Checklist</div>${reqs.map((r,i)=>`<div class="req-grade-item"><div class="req-check ${reqGrades[i]?'checked':''}" id="rcheck-${i}" onclick="toggleReq(${i})">${reqGrades[i]?'✓':''}</div><span>${esc(typeof r==='string'?r:r)}</span></div>`).join('')}</div>`:'';
+
+  const codeHTML=s.code?`<div><div class="section-title">Student Submission</div><div class="${isCode?'code-display':'text-display'}">${isCode?escHtml(s.code):esc(s.code)}</div></div>`:'';
+
+  const alreadyPassed=s.status==='passed';
+  const reviewHTML=!alreadyPassed?`<div>
+    <div class="section-title">Your Feedback</div>
+    <textarea class="feedback-ta" id="feedbackText" placeholder="Write feedback for the student…">${esc(s.feedback||'')}</textarea>
+    <div class="score-row">
+      <label style="font-size:0.875rem;color:var(--muted)">Score:</label>
+      <input class="score-input" id="scoreInput" type="number" min="0" max="${s.points||100}" value="${s.score||''}"/>
+      <span style="font-size:0.875rem;color:var(--muted)">/ ${s.points||100} pts</span>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-success" onclick="submitReview('passed')">✅ Pass</button>
+      <button class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger)" onclick="submitReview('needs_revision')">↩ Needs Revision</button>
+    </div>
+  </div>`:`<div style="padding:0.75rem 1rem;background:var(--success-light);border-radius:8px;font-size:0.875rem;color:#065f46;font-weight:500">✅ This submission has been passed.${s.feedback?'<br><em>Feedback: '+esc(s.feedback.substring(0,100))+(s.feedback.length>100?'…':'')+'</em>':''}</div>`;
+
+  document.getElementById('reviewPanel').innerHTML=`<div class="review-card">
+    <div class="review-header">
+      <div>
+        <div class="review-student">${esc(s.student_name)}</div>
+        <div class="review-meta">${esc(s.assignment_title||'Assignment')} · ${esc(s.course_title||'')}${s.resubmission_count>0?` · <strong style="color:var(--danger)">Resubmission #${s.resubmission_count}</strong>`:''}<br>Submitted: ${formatDate(s.submitted_at)}</div>
+      </div>
+      <span class="status-badge ${statusClass}">${statusLabel}</span>
+    </div>
+    <div class="review-body">${codeHTML}${reqsHTML}${reviewHTML}</div>
+  </div>`;
+}
+
+function toggleReq(i){
+  reqGrades[i]=!reqGrades[i];
+  const el=document.getElementById('rcheck-'+i);
+  if(el){el.classList.toggle('checked',reqGrades[i]);el.textContent=reqGrades[i]?'✓':'';}
+}
+
+async function submitReview(verdict){
+  if(!currentSub)return;
+  const feedback=document.getElementById('feedbackText')?.value?.trim()||'';
+  const scoreVal=document.getElementById('scoreInput')?.value;
+  const score=scoreVal?parseInt(scoreVal):null;
+  let reqs=[];try{reqs=JSON.parse(currentSub.requirements||'[]');}catch(_){}
+  const requirementGrades=reqs.map((_,i)=>reqGrades[i]||false);
+  const btns=document.querySelectorAll('.action-row .btn');btns.forEach(b=>b.disabled=true);
+  try{
+    const res=await fetch('/api/submissions/'+currentSub.id+'/review',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({verdict,feedback,requirement_grades:requirementGrades,score})});
+    if(!res.ok)throw new Error(await res.text());
+    const idx=submissions.findIndex(s=>s.id===currentSub.id);
+    if(idx>=0){submissions[idx]={...submissions[idx],status:verdict,feedback,requirement_grades:JSON.stringify(requirementGrades),score};}
+    currentSub={...currentSub,status:verdict,feedback,requirement_grades:JSON.stringify(requirementGrades),score};
+    renderList();renderReview();
+    toast(verdict==='passed'?'✅ Submission passed!':'↩ Sent back for revision','success');
+    reqGrades={};
+  }catch(e){toast('Failed: '+e.message,'error');btns.forEach(b=>b.disabled=false);}
+}
+
+function timeAgo(d){if(!d)return'';const diff=Date.now()-new Date(d).getTime();const m=Math.floor(diff/60000),h=Math.floor(m/60),day=Math.floor(h/24);if(day>0)return day+'d ago';if(h>0)return h+'h ago';if(m>0)return m+'m ago';return'just now';}
+function formatDate(d){if(!d)return'';return new Date(d).toLocaleString();}
+function toast(msg,type='success'){const c=document.getElementById('toastContainer'),el=document.createElement('div');el.className='toast '+type;el.textContent=msg;c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity 0.3s';},2500);setTimeout(()=>el.remove(),2900);}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+init();
+</script>
+</body>
+</html>
