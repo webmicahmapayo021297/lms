@@ -1,19 +1,18 @@
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const db = require('./db');
-
-
-const path = require('path');
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 app.use(session({ secret: 'lms-secret', resave: false, saveUninitialized: false }));
+
+// Root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
 // ─────────────────────────────────────────
 // Helpers
