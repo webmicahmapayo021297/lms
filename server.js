@@ -3,6 +3,13 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const db = require('./db');
 
+
+const path = require('path');
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
