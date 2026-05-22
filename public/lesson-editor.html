@@ -148,7 +148,9 @@
     .preview-hint{font-size:0.75rem;color:#92400e;background:var(--warning-light);padding:0.25rem 0.65rem;border-radius:99px;display:inline-block;margin-top:0.5rem;}
     .preview-challenge{border:2px solid var(--orange-light);border-radius:10px;padding:1.1rem;margin-bottom:1rem;}
     .preview-ch-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c2410c;margin-bottom:0.5rem;}
-    .preview-ch-instructions{font-size:0.9rem;margin-bottom:0.75rem;line-height:1.6;}
+    .preview-ch-instructions{font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;}
+    .preview-ch-step{display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;margin-bottom:0.45rem;line-height:1.6;}
+    .preview-ch-num{min-width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
     .preview-ch-expected{font-size:0.75rem;color:#065f46;background:var(--success-light);padding:0.4rem 0.75rem;border-radius:6px;margin-bottom:0.5rem;}
     .preview-assignment{border:2px solid #e9d5ff;border-radius:10px;padding:1.1rem;margin-bottom:1rem;}
     .preview-as-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--purple);margin-bottom:0.5rem;}
@@ -356,8 +358,18 @@ function buildPreview(){
     if(b.type==='note')html+=`<div class="preview-note ${b.noteType||'tip'}">${esc(b.content)}</div>`;
     if(b.type==='tryit')html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;
     if(b.type==='exercise'){const opts=(b.options||[]).map((o,i)=>`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`).join('');html+=`<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise</div><div class="preview-ex-q">${esc(b.question)}</div>${opts}${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;}
-    if(b.type==='challenge')html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div><div class="preview-ch-instructions">${esc(b.instructions)}</div><div class="preview-ch-expected">✅ Must contain: <strong>${esc(b.expectedOutput)}</strong></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
-    if(b.type==='assignment'){const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div><div class="preview-as-instructions">${esc(b.instructions)}</div>${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;}
+    if(b.type==='challenge'){
+      const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map((l,i)=>{
+        if(/^\d+\. /.test(l))return`<div class="preview-ch-step"><span class="preview-ch-num">${i+1}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
+        return`<div class="preview-ch-instructions">${escHtml(l)}</div>`;
+      }).join('');
+      html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div>${instrLines}<div class="preview-ch-expected">✅ Must contain: <code style="background:#fff;padding:0.15em 0.4em;border-radius:4px;font-family:monospace;font-size:0.82rem">${escHtml(b.expectedOutput)}</code></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
+    }
+    if(b.type==='assignment'){
+      const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');
+      const instrHtml=(b.instructions||'').split('\n').filter(l=>l.trim()).map(l=>`<div style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:0.3rem">${escHtml(l)}</div>`).join('');
+      html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div>${instrHtml}${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;
+    }
   }
   f.innerHTML=html;
 }

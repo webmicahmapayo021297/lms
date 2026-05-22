@@ -42,8 +42,13 @@
     .lesson-meta{font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;}
     .lesson-title{font-size:2rem;font-weight:700;margin-bottom:1.5rem;line-height:1.2;}
     .theory-list{list-style:none;margin-bottom:1.5rem;}
-    .theory-list li{padding:0.4rem 0 0.4rem 1.5rem;position:relative;font-size:0.95rem;line-height:1.6;}
-    .theory-list li::before{content:'▸';position:absolute;left:0;color:var(--green);}
+    .theory-li{padding:0.4rem 0 0.4rem 1.5rem;position:relative;font-size:0.95rem;line-height:1.6;}
+    .theory-li::before{content:'▸';position:absolute;left:0;color:var(--green);}
+    .theory-li.theory-plain::before{content:'▸';}
+    .theory-li.theory-numbered::before{content:none;}
+    .theory-li.theory-numbered{padding-left:0;counter-increment:none;}
+    .ch-step{display:flex;align-items:flex-start;gap:0.65rem;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;}
+    .ch-step-num{min-width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
     .note-box{border-radius:8px;padding:0.9rem 1.1rem;margin:1.25rem 0;font-size:0.88rem;line-height:1.6;border-left:4px solid;}
     .note-box.tip{background:var(--yellow-bg);border-color:var(--yellow-border);}
     .note-box.info{background:var(--blue-bg);border-color:var(--blue-border);}
@@ -448,7 +453,16 @@ function renderLesson(){
     if(b.type==='theory'){
       const lines=(b.content||'').split('\n').filter(l=>l.trim());
       if(b.label)html+=`<h2 class="section-heading">${esc(b.label)}</h2>`;
-      html+=`<ul class="theory-list">${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`;
+      let theoryHtml='';
+      lines.forEach(l=>{
+        const rendered=renderMd(l);
+        if(l.startsWith('## '))theoryHtml+=`<h2 class="section-heading">${renderMd(l.replace(/^## /,''))}</h2>`;
+        else if(l.startsWith('### '))theoryHtml+=`<h3 style="font-size:1rem;font-weight:700;margin:1rem 0 0.4rem">${renderMd(l.replace(/^### /,''))}</h3>`;
+        else if(l.startsWith('• '))theoryHtml+=`<li class="theory-li">${renderMd(l.replace(/^• /,''))}</li>`;
+        else if(/^\d+\. /.test(l))theoryHtml+=`<li class="theory-li theory-numbered">${renderMd(l.replace(/^\d+\. /,''))}</li>`;
+        else theoryHtml+=`<li class="theory-li theory-plain">${rendered}</li>`;
+      });
+      html+=`<ul class="theory-list">${theoryHtml}</ul>`;
     }
     if(b.type==='code'){
       html+=`<div class="code-block-wrap">`;
@@ -533,7 +547,11 @@ function getIIforEx(exI){
 function buildChallengeHTML(b,chI,iI){
   challengeAttempts[chI]=0;
   const num=totalInteractive>1?`🏆 Code Challenge ${iI+1}`:'🏆 Code Challenge';
-  return`<div class="challenge-card" id="challenge-${chI}"><div class="challenge-header"><div class="challenge-badge">${num}</div><div class="challenge-title">${esc(b.label||'Code Challenge')}</div></div><div class="challenge-body"><div class="challenge-instructions">${esc(b.instructions)}</div><div class="challenge-editor-wrap"><div class="challenge-editor-header"><span class="challenge-editor-label">HTML Editor</span><button class="btn-reset-ch" onclick="resetChallenge(${chI})">↺ Reset</button><button class="btn-run-ch" onclick="runChallenge(${chI})">▶ Run</button></div><div class="challenge-split"><div class="ch-code-pane" id="ch-code-${chI}"><textarea id="ch-ta-${chI}">${escHtml(b.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div><div class="ch-preview-pane"><iframe id="ch-iframe-${chI}"></iframe></div></div></div><div class="challenge-check-row"><button class="btn-check-ch" id="ch-check-${chI}" onclick="checkChallenge(${chI},${iI},${JSON.stringify(b.expectedOutput||'')},${JSON.stringify(b.matchMode||'contains')})">✓ Check My Output</button>${b.hint?`<button class="btn-hint" id="ch-hint-btn-${chI}" onclick="showChallengeHint(${chI})" style="display:none">💡 Hint</button>`:''}<span class="attempts-badge" id="ch-att-${chI}">0 attempts</span></div><div class="ch-feedback" id="ch-fb-${chI}"></div>${b.hint?`<div class="ch-hint" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}</div></div>`;
+  const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map((l,i)=>{
+    if(/^\d+\. /.test(l))return`<div class="ch-step"><span class="ch-step-num">${l.match(/^(\d+)/)[1]}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
+    return`<div class="challenge-instructions">${escHtml(l)}</div>`;
+  }).join('');
+  return`<div class="challenge-card" id="challenge-${chI}"><div class="challenge-header"><div class="challenge-badge">${num}</div><div class="challenge-title">${esc(b.label||'Code Challenge')}</div></div><div class="challenge-body">${instrLines}<div class="challenge-editor-wrap"><div class="challenge-editor-header"><span class="challenge-editor-label">HTML Editor</span><button class="btn-reset-ch" onclick="resetChallenge(${chI})">↺ Reset</button><button class="btn-run-ch" onclick="runChallenge(${chI})">▶ Run</button></div><div class="challenge-split"><div class="ch-code-pane" id="ch-code-${chI}"><textarea id="ch-ta-${chI}">${escHtml(b.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div><div class="ch-preview-pane"><iframe id="ch-iframe-${chI}"></iframe></div></div></div><div class="challenge-check-row"><button class="btn-check-ch" id="ch-check-${chI}" onclick="checkChallenge(${chI},${iI},${JSON.stringify(b.expectedOutput||'')},${JSON.stringify(b.matchMode||'contains')})">✓ Check My Output</button>${b.hint?`<button class="btn-hint" id="ch-hint-btn-${chI}" onclick="showChallengeHint(${chI})" style="display:none">💡 Hint</button>`:''}<span class="attempts-badge" id="ch-att-${chI}">0 attempts</span></div><div class="ch-feedback" id="ch-fb-${chI}"></div>${b.hint?`<div class="ch-hint" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}</div></div>`;
 }
 function initChallengeEditor(chI,block){
   const ta=document.getElementById('ch-ta-'+chI);if(!ta||challengeEditors[chI])return;
@@ -706,6 +724,13 @@ function runTryIt(){const code=tryItEditor?tryItEditor.getValue():'';const frame
 function resetTryIt(){if(tryItEditor){tryItEditor.setValue(tryItOriginalCode);runTryIt();}}
 function closeEditor(){document.getElementById('editorOverlay').classList.remove('open');}
 
+function renderMd(s){
+  return String(s??'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/_(.+?)_/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code style="background:#f1f5f9;padding:0.1em 0.4em;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:0.88em">$1</code>');
+}
 function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 init();
