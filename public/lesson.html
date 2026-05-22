@@ -101,8 +101,9 @@
     .challenge-body{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
     .challenge-instructions{font-size:0.9rem;line-height:1.7;margin-bottom:0.4rem;display:block;}
     .challenge-body>div{display:block;}
-    .ch-step{display:flex;align-items:flex-start;gap:0.65rem;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;}
-    .ch-step-num{min-width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+    .ch-step{display:flex;flex-direction:row;align-items:flex-start;gap:0.65rem;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;width:100%;}
+    .ch-step-num{min-width:24px;width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+    .ch-step-text{flex:1;}
     .challenge-editor-wrap{border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
     .challenge-editor-header{background:#1e1e2e;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.75rem;}
     .challenge-editor-label{font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;}
@@ -563,7 +564,7 @@ function buildChallengeHTML(b,chI,iI){
 
   const lines=splitInstructions(b.instructions);
   const instrHtml=lines.map(l=>{
-    if(/^\d+\. /.test(l))return`<div class="ch-step"><span class="ch-step-num">${l.match(/^(\d+)/)[1]}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
+    if(/^\d+\. /.test(l))return`<div class="ch-step"><span class="ch-step-num">${l.match(/^(\d+)/)[1]}</span><span class="ch-step-text">${escHtml(l.replace(/^\d+\. /,''))}</span></div>`;
     return`<div class="challenge-instructions">${escHtml(l)}</div>`;
   }).join('');
 
