@@ -45,28 +45,7 @@
     .block-card:focus-within{border-color:var(--primary);box-shadow:var(--shadow-md);}
     .block-header{display:flex;align-items:center;gap:0.65rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;border-radius:var(--radius) var(--radius) 0 0;}
     .block-type-badge{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:0.18rem 0.55rem;border-radius:99px;flex-shrink:0;}
-    .badge-theory{background:var(--primary-light);color:var(--primary);}.badge-code{background:#1e1e2e;color:#a5b4fc;}.badge-note{background:var(--warning-light);color:#92400e;}.badge-tryit{background:var(--success-light);color:#065f46;}.badge-exercise{background:#fce7f3;color:#9d174d;}.badge-challenge{background:var(--orange-light);color:#c2410c;}.badge-assignment{background:var(--purple-light);color:var(--purple);}.badge-fillblank{background:#e0f2fe;color:#0369a1;}
-    /* Fill in Blanks */
-    .fb-builder{display:flex;flex-direction:column;gap:1rem;}
-    .fb-label{font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:0.25rem;}
-    .fb-hint{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;}
-    .fb-code-ta{width:100%;min-height:120px;padding:0.65rem 0.85rem;border:1.5px solid #0369a1;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.6;resize:vertical;outline:none;background:#f0f9ff;color:var(--text);}
-    .fb-code-ta:focus{border-color:#0284c7;box-shadow:0 0 0 3px rgba(3,105,161,0.1);}
-    .fb-blanks-section{display:flex;flex-direction:column;gap:0.5rem;}
-    .fb-blank-row{display:flex;align-items:center;gap:0.65rem;padding:0.5rem 0.75rem;background:#f0f9ff;border-radius:8px;border:1.5px solid #bae6fd;}
-    .fb-blank-num{width:24px;height:24px;border-radius:50%;background:#0369a1;color:#fff;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .fb-blank-label{font-size:0.78rem;color:var(--muted);flex-shrink:0;font-family:'JetBrains Mono',monospace;}
-    .fb-answer-input{flex:1;padding:0.4rem 0.65rem;border:1.5px solid var(--border);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;outline:none;background:#fff;}
-    .fb-answer-input:focus{border-color:#0369a1;}
-    .fb-question-input{width:100%;padding:0.55rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.875rem;outline:none;}
-    .fb-question-input:focus{border-color:#0369a1;}
-    .fb-detect-btn{padding:0.4rem 0.85rem;border-radius:7px;border:1.5px solid #0369a1;background:#e0f2fe;color:#0369a1;font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;}
-    .fb-detect-btn:hover{background:#0369a1;color:#fff;}
-    .preview-fillblank{border:2px solid #bae6fd;border-radius:10px;padding:1.1rem;margin-bottom:1rem;background:#f0f9ff;}
-    .preview-fb-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0369a1;margin-bottom:0.5rem;}
-    .preview-fb-q{font-size:0.95rem;font-weight:600;margin-bottom:0.75rem;}
-    .preview-fb-code{background:#1e1e2e;color:#cdd6f4;padding:1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.8;white-space:pre-wrap;margin-bottom:0.75rem;}
-    .preview-fb-blank{display:inline-block;background:#334155;border-bottom:2px solid #7dd3fc;min-width:80px;height:22px;border-radius:4px;vertical-align:middle;}
+    .badge-theory{background:var(--primary-light);color:var(--primary);}.badge-code{background:#1e1e2e;color:#a5b4fc;}.badge-note{background:var(--warning-light);color:#92400e;}.badge-tryit{background:var(--success-light);color:#065f46;}.badge-exercise{background:#fce7f3;color:#9d174d;}.badge-challenge{background:var(--orange-light);color:#c2410c;}.badge-assignment{background:var(--purple-light);color:var(--purple);}
     .block-title-input{flex:1;border:none;background:transparent;font:inherit;font-size:0.875rem;font-weight:600;color:var(--text);outline:none;}
     .block-title-input::placeholder{color:#b0bbc8;font-weight:400;}
     .block-actions{display:flex;gap:0.35rem;margin-left:auto;}
@@ -230,7 +209,6 @@
       <button class="add-block-btn ex" onclick="addBlock('exercise')">📝 Exercise</button>
       <button class="add-block-btn ch" onclick="addBlock('challenge')">🏆 Challenge</button>
       <button class="add-block-btn as" onclick="addBlock('assignment')">📋 Assignment</button>
-      <button class="add-block-btn" style="border-color:#bae6fd;color:#0369a1" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background=''" onclick="addBlock('fillblank')">✏️ Fill Blanks</button>
     </div>
     <div>
       <div class="preview-bar" onclick="togglePreview()"><span style="font-size:0.85rem;font-weight:700">👁 Lesson Preview</span><span class="preview-chevron" id="previewChevron">▼</span></div>
@@ -290,12 +268,11 @@ function addBlock(type,data={}){
   if(type==='challenge')setTimeout(()=>initChallengeCM(id,data),50);
   if(type==='exercise')initOptions(id,data.options||[]);
   if(type==='assignment')initReqList(id,data.requirements||[]);
-  if(type==='fillblank')setTimeout(()=>detectBlanks(id,data.answers||[]),50);
 }
 
 function blockHeader(id,type,data){
-  const badges={theory:'badge-theory',code:'badge-code',note:'badge-note',tryit:'badge-tryit',exercise:'badge-exercise',challenge:'badge-challenge',assignment:'badge-assignment',fillblank:'badge-fillblank'};
-  const labels={theory:'📄 Theory',code:'💻 Code',note:'💡 Note',tryit:'▶ Try It',exercise:'📝 Exercise',challenge:'🏆 Challenge',assignment:'📋 Assignment',fillblank:'✏️ Fill Blanks'};
+  const badges={theory:'badge-theory',code:'badge-code',note:'badge-note',tryit:'badge-tryit',exercise:'badge-exercise',challenge:'badge-challenge',assignment:'badge-assignment'};
+  const labels={theory:'📄 Theory',code:'💻 Code',note:'💡 Note',tryit:'▶ Try It',exercise:'📝 Exercise',challenge:'🏆 Challenge',assignment:'📋 Assignment'};
   return`<div class="block-header"><span class="block-type-badge ${badges[type]}">${labels[type]}</span><input class="block-title-input" id="blabel-${id}" placeholder="Block label (optional)" value="${esc(data.label||'')}"/><div class="block-actions"><button class="block-action-btn" onclick="moveBlock(${id},-1)">↑</button><button class="block-action-btn" onclick="moveBlock(${id},1)">↓</button><button class="block-action-btn del" onclick="deleteBlock(${id})">🗑</button></div></div>`;
 }
 
@@ -307,31 +284,6 @@ function buildBlockHTML(id,type,data){
   if(type==='tryit')return hdr+`<div class="block-body"><p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">Standalone "Try it Yourself" editor for students.</p><textarea class="theory-ta" id="bcm-${id}" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem" placeholder="Optional starter HTML…">${esc(data.code||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div>`;
   if(type==='exercise')return hdr+`<div class="block-body"><div class="exercise-builder"><div class="form-field"><label class="ex-label">Question *</label><textarea class="ex-question-ta" id="exq-${id}" placeholder="e.g. What does HTML stand for?">${esc(data.question||'')}</textarea></div><div class="form-field"><label class="ex-label">Answer Options</label><div class="correct-hint">Click the <span>circle</span> next to the correct answer.</div><div class="options-list" id="opts-${id}"></div><button class="btn-add-option" onclick="addOption(${id})">＋ Add Option</button></div><div class="form-field"><label class="ex-label">💡 Hint (shown after wrong answer)</label><input class="ex-hint-input" id="exhint-${id}" type="text" placeholder="e.g. Think about what HT means…" value="${esc(data.hint||'')}"/></div></div></div>`;
   if(type==='challenge'){const mm=data.matchMode||'contains';return hdr+`<div class="block-body"><div class="challenge-builder"><div class="ch-section"><label class="ch-label">Instructions *</label><textarea class="ch-instructions" id="chi-${id}" placeholder="e.g. Create an h1 that says Hello World">${esc(data.instructions||'')}</textarea></div><div class="ch-section"><label class="ch-label">Starter Code</label><textarea id="chta-${id}" style="display:none">${esc(data.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea><div id="chcm-${id}"></div></div><div class="ch-section"><label class="ch-label">Expected Output *</label><div class="ch-hint-text">Text the student's rendered page must contain to pass.</div><textarea class="expected-ta" id="chex-${id}" placeholder="e.g. Hello World">${esc(data.expectedOutput||'')}</textarea></div><div class="ch-section"><label class="ch-label">Match Mode</label><div class="match-mode-row"><button class="match-btn contains ${mm==='contains'?'active':''}" onclick="setMatchMode(${id},'contains')">Contains</button><button class="match-btn exact ${mm==='exact'?'active':''}" onclick="setMatchMode(${id},'exact')">Exact</button><input type="hidden" id="chmm-${id}" value="${mm}"/></div></div><div class="ch-section"><label class="ch-label">💡 Hint</label><input class="ch-hint-input" id="chhint-${id}" type="text" placeholder="Hint shown after failed attempt…" value="${esc(data.hint||'')}"/></div></div></div>`;}
-  if(type==='fillblank'){
-    const answers=data.answers||[];
-    const answersJson=esc(JSON.stringify(answers));
-    return hdr+`<div class="block-body"><div class="fb-builder">
-      <div class="form-field">
-        <label class="fb-label">Question / Instruction *</label>
-        <input class="fb-question-input" id="fbq-${id}" type="text" placeholder="e.g. Complete the CSS to set the background to yellow." value="${esc(data.question||'')}"/>
-      </div>
-      <div class="form-field">
-        <label class="fb-label">Code with Blanks *</label>
-        <div class="fb-hint">Use <strong>___</strong> (3 underscores) to mark each blank. Each ___ becomes one input field for the student.</div>
-        <textarea class="fb-code-ta" id="fbcode-${id}" placeholder="e.g. body {\n  background-color: ___;\n}" oninput="detectBlanks(${id})">${esc(data.code||'')}</textarea>
-        <button class="fb-detect-btn" style="margin-top:0.5rem;align-self:flex-start" onclick="detectBlanks(${id})">🔍 Detect Blanks</button>
-      </div>
-      <div class="form-field">
-        <label class="fb-label">Correct Answers</label>
-        <div class="fb-hint">Fill in the correct answer for each blank detected above.</div>
-        <div class="fb-blanks-section" id="fbblanks-${id}"></div>
-      </div>
-      <div class="form-field">
-        <label class="fb-label">💡 Hint (optional)</label>
-        <input class="fb-question-input" id="fbhint-${id}" type="text" placeholder="e.g. Think about CSS color properties…" value="${esc(data.hint||'')}"/>
-      </div>
-    </div></div>`;
-  }
   if(type==='assignment'){const st=data.submissionType||'code',pts=data.points||100;return hdr+`<div class="block-body"><div class="assignment-builder"><div class="asgn-section"><label class="asgn-label">Assignment Title *</label><input class="asgn-input" id="asgntitle-${id}" type="text" placeholder="e.g. Module 1 Major Assignment" value="${esc(data.assignmentTitle||'')}"/></div><div class="asgn-section"><label class="asgn-label">Instructions *</label><div class="asgn-hint">Describe what the student needs to build and submit.</div><textarea class="asgn-ta" id="asgnins-${id}" placeholder="e.g. Build a complete webpage about your favorite topic…">${esc(data.instructions||'')}</textarea></div><div class="asgn-section"><label class="asgn-label">Requirements Checklist</label><div class="asgn-hint">Each item shows as a checkbox the student sees before submitting.</div><div class="req-list" id="reqlist-${id}" style="margin-top:0.5rem"></div><button class="btn-add-req" onclick="addReq(${id})">＋ Add Requirement</button></div><div style="display:flex;gap:1rem;flex-wrap:wrap"><div class="asgn-section" style="flex:1;min-width:110px"><label class="asgn-label">Points</label><input class="asgn-input" id="asgnpts-${id}" type="number" min="1" value="${pts}"/></div><div class="asgn-section" style="flex:2;min-width:200px"><label class="asgn-label">Submission Type</label><div class="sub-type-row"><button class="sub-type-btn code ${st==='code'?'active':''}" onclick="setSubType(${id},'code')">💻 Code</button><button class="sub-type-btn text ${st==='text'?'active':''}" onclick="setSubType(${id},'text')">📝 Text</button><input type="hidden" id="asgntype-${id}" value="${st}"/></div></div></div></div></div>`;}
   return hdr;
 }
@@ -354,29 +306,6 @@ function addReq(bId,text=''){const list=document.getElementById('reqlist-'+bId);
 function removeRow(id){document.getElementById(id)?.remove();}
 function setSubType(id,type){document.getElementById('asgntype-'+id).value=type;document.querySelectorAll('#block-'+id+' .sub-type-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(type))b.classList.add('active');});}
 
-/* Fill Blanks */
-function detectBlanks(id, existingAnswers=[]) {
-  const code = document.getElementById('fbcode-'+id)?.value || '';
-  const blanks = (code.match(/___/g) || []);
-  const container = document.getElementById('fbblanks-'+id);
-  if (!container) return;
-  // preserve existing answer values
-  const currentAnswers = [];
-  container.querySelectorAll('.fb-answer-input').forEach(inp => currentAnswers.push(inp.value));
-  container.innerHTML = '';
-  if (!blanks.length) {
-    container.innerHTML = '<div style="font-size:0.78rem;color:var(--muted);padding:0.5rem">No blanks detected. Add ___ to your code above.</div>';
-    return;
-  }
-  blanks.forEach((_, i) => {
-    const val = existingAnswers[i] ?? currentAnswers[i] ?? '';
-    const row = document.createElement('div');
-    row.className = 'fb-blank-row';
-    row.innerHTML = `<div class="fb-blank-num">${i+1}</div><span class="fb-blank-label">Blank ${i+1}:</span><input class="fb-answer-input" id="fbans-${id}-${i}" type="text" placeholder="correct answer…" value="${esc(String(val))}"/>`;
-    container.appendChild(row);
-  });
-}
-
 function deleteBlock(id){blocks=blocks.filter(b=>b.id!==id);document.getElementById('block-'+id)?.remove();delete cmEditors[id];delete cmEditors['ch-'+id];if(!blocks.length)document.getElementById('emptyMsg').style.display='';}
 function moveBlock(id,dir){const i=blocks.findIndex(b=>b.id===id),j=i+dir;if(j<0||j>=blocks.length)return;[blocks[i],blocks[j]]=[blocks[j],blocks[i]];const c=document.getElementById('blocksContainer');const a=document.getElementById('block-'+blocks[i].id);const b=document.getElementById('block-'+blocks[j].id);if(dir===-1)c.insertBefore(b,a);else c.insertBefore(a,b.nextSibling);}
 
@@ -391,7 +320,6 @@ function collectBlocks(){
     if(block.type==='exercise'){const question=document.getElementById('exq-'+id)?.value?.trim()||'';const hint=document.getElementById('exhint-'+id)?.value?.trim()||'';const optList=document.getElementById('opts-'+id);const options=[];if(optList)optList.querySelectorAll('.option-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('opttext-'+id+'-'+idx)?.value?.trim()||'';const radio=document.getElementById('optcorrect-'+id+'-'+idx);if(text)options.push({text,correct:radio?.checked||false});});return{...base,question,hint,options};}
     if(block.type==='challenge'){const sc=cmEditors['ch-'+id]?cmEditors['ch-'+id].getValue():(document.getElementById('chcmta-'+id)?.value||'');return{...base,instructions:document.getElementById('chi-'+id)?.value?.trim()||'',starterCode:sc,expectedOutput:document.getElementById('chex-'+id)?.value?.trim()||'',matchMode:document.getElementById('chmm-'+id)?.value||'contains',hint:document.getElementById('chhint-'+id)?.value?.trim()||''};}
     if(block.type==='assignment'){const reqList=document.getElementById('reqlist-'+id);const reqs=[];if(reqList)reqList.querySelectorAll('.req-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('reqtext-'+id+'-'+idx)?.value?.trim()||'';if(text)reqs.push(text);});return{...base,assignmentTitle:document.getElementById('asgntitle-'+id)?.value?.trim()||'',instructions:document.getElementById('asgnins-'+id)?.value?.trim()||'',points:parseInt(document.getElementById('asgnpts-'+id)?.value)||100,submissionType:document.getElementById('asgntype-'+id)?.value||'code',requirements:reqs};}
-    if(block.type==='fillblank'){const code=document.getElementById('fbcode-'+id)?.value||'';const blanks=(code.match(/___/g)||[]);const answers=blanks.map((_,i)=>document.getElementById('fbans-'+id+'-'+i)?.value?.trim()||'');return{...base,question:document.getElementById('fbq-'+id)?.value?.trim()||'',code,answers,hint:document.getElementById('fbhint-'+id)?.value?.trim()||''};}
     return base;
   }).filter(Boolean);
 }
@@ -405,7 +333,6 @@ async function saveLesson(){
     if(b.type==='exercise'&&(!b.question||b.options.length<2||!b.options.some(o=>o.correct))){toast('An exercise is incomplete','error');return;}
     if(b.type==='challenge'&&(!b.instructions||!b.expectedOutput)){toast('A challenge is incomplete','error');return;}
     if(b.type==='assignment'&&(!b.assignmentTitle||!b.instructions)){toast('An assignment is incomplete','error');return;}
-    if(b.type==='fillblank'&&(!b.code||!b.answers.length||b.answers.some(a=>!a))){toast('A fill-in-the-blank is incomplete — add blanks and answers','error');return;}
   }
   const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='💾 Saving…';
   const payload={title,content:JSON.stringify({blocks:collected}),code_example:collected.find(b=>b.type==='code')?.code||'',module_number:parseInt(document.getElementById('moduleNumber').value)||1,order_num:parseInt(document.getElementById('orderNum').value)||1,is_major_assignment:document.getElementById('isMajor').checked?1:0,description:collected.filter(b=>b.type==='theory').map(b=>b.content).join('\n\n')};
@@ -429,12 +356,14 @@ function buildPreview(){
     if(b.type==='note')html+=`<div class="preview-note ${b.noteType||'tip'}">${esc(b.content)}</div>`;
     if(b.type==='tryit')html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;
     if(b.type==='exercise'){const opts=(b.options||[]).map((o,i)=>`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`).join('');html+=`<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise</div><div class="preview-ex-q">${esc(b.question)}</div>${opts}${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;}
-    if(b.type==='challenge')html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div><div class="preview-ch-instructions">${esc(b.instructions)}</div><div class="preview-ch-expected">✅ Must contain: <strong>${esc(b.expectedOutput)}</strong></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
-    if(b.type==='assignment'){const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div><div class="preview-as-instructions">${esc(b.instructions)}</div>${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;}
-    if(b.type==='fillblank'){
-      const previewCode=escHtml(b.code||'').replace(/___/g,'<span class="preview-fb-blank"></span>');
-      html+=`<div class="preview-fillblank"><div class="preview-fb-label">✏️ Fill in the Blanks</div>${b.question?`<div class="preview-fb-q">${esc(b.question)}</div>`:''}<pre class="preview-fb-code">${previewCode}</pre>${(b.answers||[]).map((a,i)=>`<div style="font-size:0.78rem;color:#0369a1;margin-bottom:0.2rem">Blank ${i+1} answer: <strong>${esc(a)}</strong></div>`).join('')}${b.hint?`<div class="preview-hint" style="margin-top:0.5rem">💡 ${esc(b.hint)}</div>`:''}</div>`;
+    if(b.type==='challenge'){
+      const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map(l=>{
+        if(/^\d+\. /.test(l))return`<div style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;margin-bottom:0.45rem;line-height:1.6"><span style="min-width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem">${l.match(/^(\d+)/)[1]}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
+        return`<div style="font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6">${escHtml(l)}</div>`;
+      }).join('');
+      html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div>${instrLines}<div class="preview-ch-expected">✅ Must contain: <code style="background:#fff;padding:0.15em 0.4em;border-radius:4px;font-family:monospace;font-size:0.82rem">${escHtml(b.expectedOutput)}</code></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
     }
+    if(b.type==='assignment'){const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div><div class="preview-as-instructions">${esc(b.instructions)}</div>${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;}
   }
   f.innerHTML=html;
 }
