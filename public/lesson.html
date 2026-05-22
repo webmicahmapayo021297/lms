@@ -42,13 +42,8 @@
     .lesson-meta{font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;}
     .lesson-title{font-size:2rem;font-weight:700;margin-bottom:1.5rem;line-height:1.2;}
     .theory-list{list-style:none;margin-bottom:1.5rem;}
-    .theory-li{padding:0.4rem 0 0.4rem 1.5rem;position:relative;font-size:0.95rem;line-height:1.6;}
-    .theory-li::before{content:'▸';position:absolute;left:0;color:var(--green);}
-    .theory-li.theory-plain::before{content:'▸';}
-    .theory-li.theory-numbered::before{content:none;}
-    .theory-li.theory-numbered{padding-left:0;counter-increment:none;}
-    .ch-step{display:flex;align-items:flex-start;gap:0.65rem;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;}
-    .ch-step-num{min-width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
+    .theory-list li{padding:0.4rem 0 0.4rem 1.5rem;position:relative;font-size:0.95rem;line-height:1.6;}
+    .theory-list li::before{content:'▸';position:absolute;left:0;color:var(--green);}
     .note-box{border-radius:8px;padding:0.9rem 1.1rem;margin:1.25rem 0;font-size:0.88rem;line-height:1.6;border-left:4px solid;}
     .note-box.tip{background:var(--yellow-bg);border-color:var(--yellow-border);}
     .note-box.info{background:var(--blue-bg);border-color:var(--blue-border);}
@@ -127,6 +122,33 @@
     .ch-hint{display:none;padding:0.75rem 1rem;background:var(--yellow-bg);border:1px solid #f59e0b;border-radius:8px;font-size:0.875rem;color:#78350f;line-height:1.6;}
     .ch-hint.show{display:block;}
     .attempts-badge{font-size:0.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:0.2rem 0.6rem;border-radius:99px;}
+    /* Fill in Blanks */
+    .fillblank-card{background:var(--card);border-radius:12px;border:2px solid #bae6fd;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;}
+    .fillblank-card.passed{border-color:var(--green);}
+    .fillblank-header{padding:1rem 1.5rem;background:#f0f9ff;border-bottom:2px solid #bae6fd;display:flex;align-items:center;justify-content:space-between;}
+    .fillblank-card.passed .fillblank-header{background:var(--green-light);border-bottom-color:#a7f3d0;}
+    .fillblank-badge{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#0369a1;}
+    .fillblank-card.passed .fillblank-badge{color:var(--green-dark);}
+    .fillblank-body{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
+    .fillblank-question{font-size:1rem;font-weight:600;line-height:1.5;margin-bottom:0.25rem;}
+    .fillblank-code{background:#1e1e2e;border-radius:10px;padding:1.1rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.875rem;line-height:1.9;overflow-x:auto;white-space:pre-wrap;}
+    .fb-input{display:inline-block;background:#2d3748;border:2px solid #4a90d9;border-radius:5px;color:#7dd3fc;font-family:'JetBrains Mono',monospace;font-size:0.875rem;padding:0.1rem 0.4rem;min-width:80px;outline:none;transition:border-color 0.15s,background 0.15s;vertical-align:middle;}
+    .fb-input:focus{border-color:#7dd3fc;background:#1e3a5f;}
+    .fb-input.correct{border-color:#10b981;background:#064e3b;color:#6ee7b7;}
+    .fb-input.incorrect{border-color:#ef4444;background:#4c0519;color:#fca5a5;}
+    .fb-input:disabled{cursor:not-allowed;}
+    .fillblank-actions{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-top:0.25rem;}
+    .btn-check-fb{padding:0.55rem 1.4rem;background:#0369a1;color:#fff;border:none;border-radius:7px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
+    .btn-check-fb:hover:not(:disabled){background:#0284c7;}
+    .btn-check-fb:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn-show-ans{padding:0.5rem 1rem;background:transparent;color:#0369a1;border:1.5px solid #7dd3fc;border-radius:7px;font:inherit;font-size:0.82rem;font-weight:600;cursor:pointer;}
+    .btn-show-ans:hover{background:#e0f2fe;}
+    .fb-feedback{margin-top:0.5rem;padding:0.7rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;display:none;}
+    .fb-feedback.show{display:block;}
+    .fb-feedback.success{background:var(--green-light);color:#065f46;border:1px solid #a7f3d0;}
+    .fb-feedback.error{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
+    .bp-dot.fillblank{background:#e0f2fe;border:2px solid #0369a1;}
+    .bp-dot.fillblank.passed{background:#0369a1;}
     .assignment-card{background:var(--card);border-radius:12px;border:2px solid #e9d5ff;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;}
     .assignment-card.pending{border-color:#fde68a;}
     .assignment-card.needs-revision{border-color:#fca5a5;}
@@ -315,10 +337,10 @@ function restoreInteractiveState(lessonAlreadyDone){
   let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
   const blocks=content.blocks||[];
   const letters=['A','B','C','D','E','F'];
-  let exI=0,chI=0,asI=0,iI=0;
+  let exI=0,chI=0,asI=0,fbI=0,iI=0;
 
   for(const b of blocks){
-    if(['exercise','challenge','assignment'].includes(b.type)){
+    if(['exercise','challenge','assignment','fillblank'].includes(b.type)){
       const alreadyPassed=lessonAlreadyDone||passedInteractiveIndices.has(iI);
 
       if(alreadyPassed && b.type==='exercise'){
@@ -369,9 +391,28 @@ function restoreInteractiveState(lessonAlreadyDone){
         updateProgressDot(iI,true);
       }
 
+      if(alreadyPassed && b.type==='fillblank'){
+        const card=document.getElementById('fillblank-'+fbI);
+        if(card)card.classList.add('passed');
+        const badge=document.querySelector('#fillblank-'+fbI+' .fillblank-badge');
+        if(badge)badge.style.color='var(--green-dark)';
+        const checkBtn=document.getElementById('fb-check-'+fbI);
+        if(checkBtn){checkBtn.textContent='✓ Passed';checkBtn.style.background='var(--green)';checkBtn.disabled=true;}
+        // Show correct answers in inputs
+        document.querySelectorAll('#fillblank-'+fbI+' .fb-input').forEach(inp=>{
+          const ans=(b.answers||[])[parseInt(inp.dataset.idx)||0]||'';
+          inp.value=ans;inp.classList.add('correct');inp.disabled=true;
+        });
+        const fb=document.getElementById('fb-fb-'+fbI);
+        if(fb){fb.textContent='✅ Previously completed!';fb.className='fb-feedback show success';}
+        blockPassed[iI]=true;
+        updateProgressDot(iI,true);
+      }
+
       if(b.type==='exercise')exI++;
       if(b.type==='challenge')chI++;
       if(b.type==='assignment')asI++;
+      if(b.type==='fillblank')fbI++;
       iI++;
     }
   }
@@ -429,9 +470,8 @@ function renderLesson(){
   const idx=allLessons.findIndex(l=>l.id===lesson.id);
   const prev=allLessons[idx-1]||null, next=allLessons[idx+1]||null;
   const isDone=completedIds.has(lesson.id);
-  const interactiveBlocks=blocks.filter(b=>['exercise','challenge','assignment'].includes(b.type));
+  const interactiveBlocks=blocks.filter(b=>['exercise','challenge','assignment','fillblank'].includes(b.type));
   totalInteractive=interactiveBlocks.length;
-  // Initialise all as false — restoreInteractiveState will set the true ones
   interactiveBlocks.forEach((_,i)=>{blockPassed[i]=false;});
 
   let html='<div class="lesson-meta">Module '+(lesson.module_number||1)+' › Lesson '+lesson.order_num+'</div>';
@@ -439,7 +479,7 @@ function renderLesson(){
   if(totalInteractive>1){
     let dots='', iIdx=0;
     blocks.forEach(b=>{
-      if(['exercise','challenge','assignment'].includes(b.type)){
+      if(['exercise','challenge','assignment','fillblank'].includes(b.type)){
         dots+=`<div class="bp-dot ${b.type}" id="bp-dot-${iIdx}" title="${b.type} ${iIdx+1}"></div>`;iIdx++;
       }
     });
@@ -448,21 +488,12 @@ function renderLesson(){
 
   tryitBlocks={};
   assignmentBlocks={};
-  let exI=0,chI=0,asI=0,iI=0;
+  let exI=0,chI=0,asI=0,fbI=0,iI=0;
   for(const b of blocks){
     if(b.type==='theory'){
       const lines=(b.content||'').split('\n').filter(l=>l.trim());
       if(b.label)html+=`<h2 class="section-heading">${esc(b.label)}</h2>`;
-      let theoryHtml='';
-      lines.forEach(l=>{
-        const rendered=renderMd(l);
-        if(l.startsWith('## '))theoryHtml+=`<h2 class="section-heading">${renderMd(l.replace(/^## /,''))}</h2>`;
-        else if(l.startsWith('### '))theoryHtml+=`<h3 style="font-size:1rem;font-weight:700;margin:1rem 0 0.4rem">${renderMd(l.replace(/^### /,''))}</h3>`;
-        else if(l.startsWith('• '))theoryHtml+=`<li class="theory-li">${renderMd(l.replace(/^• /,''))}</li>`;
-        else if(/^\d+\. /.test(l))theoryHtml+=`<li class="theory-li theory-numbered">${renderMd(l.replace(/^\d+\. /,''))}</li>`;
-        else theoryHtml+=`<li class="theory-li theory-plain">${rendered}</li>`;
-      });
-      html+=`<ul class="theory-list">${theoryHtml}</ul>`;
+      html+=`<ul class="theory-list">${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`;
     }
     if(b.type==='code'){
       html+=`<div class="code-block-wrap">`;
@@ -484,6 +515,7 @@ function renderLesson(){
     if(b.type==='exercise'){html+=buildExerciseHTML(b,exI,iI);exI++;iI++;}
     if(b.type==='challenge'){html+=buildChallengeHTML(b,chI,iI);chI++;iI++;}
     if(b.type==='assignment'){html+=buildAssignmentHTML(b,asI,iI);asI++;iI++;}
+    if(b.type==='fillblank'){html+=buildFillBlankHTML(b,fbI,iI);fbI++;iI++;}
   }
 
   // Next button: locked only if there are unfinished interactives
@@ -502,6 +534,122 @@ function renderLesson(){
   let chIdx2=0;
   blocks.forEach(b=>{if(b.type==='challenge'){const i2=chIdx2;setTimeout(()=>initChallengeEditor(i2,b),100+i2*60);chIdx2++;}});
 }
+
+/* ── Fill in the Blanks ── */
+function buildFillBlankHTML(b,fbI,iI){
+  const num=totalInteractive>1?`✏️ Fill in the Blanks ${iI+1}`:'✏️ Fill in the Blanks';
+  const answers=b.answers||[];
+  let blankIdx=0;
+  // Build code with inline inputs replacing ___
+  const codeHtml=escHtml(b.code||'').replace(/___/g,()=>{
+    const i=blankIdx++;
+    return`</span><input class="fb-input" id="fb-inp-${fbI}-${i}" data-idx="${i}" data-fbi="${fbI}" data-ii="${iI}" placeholder="?" autocomplete="off" oninput="fbInputChanged(${fbI})" onkeydown="if(event.key==='Enter')checkFillBlank(${fbI},${iI})"/><span class="fb-code-text">`;
+  });
+  return`<div class="fillblank-card" id="fillblank-${fbI}">
+    <div class="fillblank-header">
+      <div class="fillblank-badge">${num}</div>
+      <span class="attempts-badge" id="fb-att-${fbI}">0 attempts</span>
+    </div>
+    <div class="fillblank-body">
+      ${b.question?`<div class="fillblank-question">${esc(b.question)}</div>`:''}
+      <div class="fillblank-code"><span class="fb-code-text">${codeHtml}</span></div>
+      <div class="fillblank-actions">
+        <button class="btn-check-fb" id="fb-check-${fbI}" onclick="checkFillBlank(${fbI},${iI})" disabled>✓ Check Answer</button>
+        <button class="btn-show-ans" onclick="showFillBlankAnswers(${fbI})">Show Answer</button>
+        ${b.hint?`<button class="btn-hint" id="fb-hint-btn-${fbI}" onclick="showFbHint(${fbI})" style="display:none">💡 Hint</button>`:''}
+      </div>
+      <div class="fb-feedback" id="fb-fb-${fbI}"></div>
+      ${b.hint?`<div class="hint-box" id="fb-hint-box-${fbI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function fbInputChanged(fbI){
+  // Enable check button only when all blanks have values
+  const inputs=[...document.querySelectorAll(`#fillblank-${fbI} .fb-input`)];
+  const allFilled=inputs.every(i=>i.value.trim()!=='');
+  const btn=document.getElementById('fb-check-'+fbI);
+  if(btn)btn.disabled=!allFilled;
+}
+
+async function checkFillBlank(fbI,iI){
+  if(blockPassed[iI])return;
+  let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
+  const fbBlocks=(content.blocks||[]).filter(b=>b.type==='fillblank');
+  const block=fbBlocks[fbI];if(!block)return;
+  const answers=block.answers||[];
+  const inputs=[...document.querySelectorAll(`#fillblank-${fbI} .fb-input`)];
+
+  let allCorrect=true;
+  inputs.forEach((inp,i)=>{
+    const student=inp.value.trim().toLowerCase();
+    const correct=(answers[i]||'').trim().toLowerCase();
+    if(student===correct){
+      inp.classList.remove('incorrect');inp.classList.add('correct');
+    }else{
+      inp.classList.remove('correct');inp.classList.add('incorrect');
+      allCorrect=false;
+    }
+  });
+
+  // Track attempts
+  const attEl=document.getElementById('fb-att-'+fbI);
+  const attempts=(parseInt(attEl?.dataset.count||0))+1;
+  if(attEl){attEl.dataset.count=attempts;attEl.textContent=attempts+' attempt'+(attempts!==1?'s':'');}
+
+  const fb=document.getElementById('fb-fb-'+fbI);
+
+  // Save to DB
+  try{
+    await fetch('/api/exercises/check',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({
+      lesson_id:lesson.id,
+      exercise_index:fbI,
+      interactive_index:iI,
+      answer_index:0,
+      passed:allCorrect,
+      answers:JSON.stringify(inputs.map(i=>i.value.trim()))
+    })});
+  }catch(_){}
+
+  if(allCorrect){
+    inputs.forEach(inp=>{inp.disabled=true;});
+    fb.textContent='✅ Perfect! All blanks correct!';fb.className='fb-feedback show success';
+    document.getElementById('fillblank-'+fbI)?.classList.add('passed');
+    const btn=document.getElementById('fb-check-'+fbI);
+    btn.textContent='✓ Passed';btn.style.background='var(--green)';btn.disabled=true;
+    document.getElementById('fb-hint-btn-'+fbI)?.remove();
+    onBlockPassed(iI);
+  }else{
+    fb.textContent='❌ Some blanks are incorrect — highlighted in red. Try again!';
+    fb.className='fb-feedback show error';
+    if(attempts>=1){const hb=document.getElementById('fb-hint-btn-'+fbI);if(hb)hb.style.display='';}
+    // Reset incorrect inputs after a moment
+    setTimeout(()=>{
+      inputs.forEach(inp=>{
+        if(inp.classList.contains('incorrect')){inp.classList.remove('incorrect');inp.value='';}
+      });
+      fbInputChanged(fbI);
+    },1200);
+  }
+}
+
+function showFillBlankAnswers(fbI){
+  let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
+  const fbBlocks=(content.blocks||[]).filter(b=>b.type==='fillblank');
+  const block=fbBlocks[fbI];if(!block)return;
+  const answers=block.answers||[];
+  document.querySelectorAll(`#fillblank-${fbI} .fb-input`).forEach((inp,i)=>{
+    inp.value=answers[i]||'';
+    inp.classList.add('correct');
+    inp.disabled=true;
+  });
+  const btn=document.getElementById('fb-check-'+fbI);
+  if(btn){btn.textContent='✓ Shown';btn.disabled=true;btn.style.background='var(--muted)';}
+  const fb=document.getElementById('fb-fb-'+fbI);
+  if(fb){fb.textContent='💡 Answers revealed. Study them and move on!';fb.className='fb-feedback show';}
+}
+
+function showFbHint(fbI){document.getElementById('fb-hint-box-'+fbI)?.classList.add('show');document.getElementById('fb-hint-btn-'+fbI)?.remove();}
 
 /* ── Exercise ── */
 function buildExerciseHTML(b,exI,iI){
@@ -547,11 +695,7 @@ function getIIforEx(exI){
 function buildChallengeHTML(b,chI,iI){
   challengeAttempts[chI]=0;
   const num=totalInteractive>1?`🏆 Code Challenge ${iI+1}`:'🏆 Code Challenge';
-  const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map((l,i)=>{
-    if(/^\d+\. /.test(l))return`<div class="ch-step"><span class="ch-step-num">${l.match(/^(\d+)/)[1]}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
-    return`<div class="challenge-instructions">${escHtml(l)}</div>`;
-  }).join('');
-  return`<div class="challenge-card" id="challenge-${chI}"><div class="challenge-header"><div class="challenge-badge">${num}</div><div class="challenge-title">${esc(b.label||'Code Challenge')}</div></div><div class="challenge-body">${instrLines}<div class="challenge-editor-wrap"><div class="challenge-editor-header"><span class="challenge-editor-label">HTML Editor</span><button class="btn-reset-ch" onclick="resetChallenge(${chI})">↺ Reset</button><button class="btn-run-ch" onclick="runChallenge(${chI})">▶ Run</button></div><div class="challenge-split"><div class="ch-code-pane" id="ch-code-${chI}"><textarea id="ch-ta-${chI}">${escHtml(b.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div><div class="ch-preview-pane"><iframe id="ch-iframe-${chI}"></iframe></div></div></div><div class="challenge-check-row"><button class="btn-check-ch" id="ch-check-${chI}" onclick="checkChallenge(${chI},${iI},${JSON.stringify(b.expectedOutput||'')},${JSON.stringify(b.matchMode||'contains')})">✓ Check My Output</button>${b.hint?`<button class="btn-hint" id="ch-hint-btn-${chI}" onclick="showChallengeHint(${chI})" style="display:none">💡 Hint</button>`:''}<span class="attempts-badge" id="ch-att-${chI}">0 attempts</span></div><div class="ch-feedback" id="ch-fb-${chI}"></div>${b.hint?`<div class="ch-hint" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}</div></div>`;
+  return`<div class="challenge-card" id="challenge-${chI}"><div class="challenge-header"><div class="challenge-badge">${num}</div><div class="challenge-title">${esc(b.label||'Code Challenge')}</div></div><div class="challenge-body"><div class="challenge-instructions">${esc(b.instructions)}</div><div class="challenge-editor-wrap"><div class="challenge-editor-header"><span class="challenge-editor-label">HTML Editor</span><button class="btn-reset-ch" onclick="resetChallenge(${chI})">↺ Reset</button><button class="btn-run-ch" onclick="runChallenge(${chI})">▶ Run</button></div><div class="challenge-split"><div class="ch-code-pane" id="ch-code-${chI}"><textarea id="ch-ta-${chI}">${escHtml(b.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div><div class="ch-preview-pane"><iframe id="ch-iframe-${chI}"></iframe></div></div></div><div class="challenge-check-row"><button class="btn-check-ch" id="ch-check-${chI}" onclick="checkChallenge(${chI},${iI},${JSON.stringify(b.expectedOutput||'')},${JSON.stringify(b.matchMode||'contains')})">✓ Check My Output</button>${b.hint?`<button class="btn-hint" id="ch-hint-btn-${chI}" onclick="showChallengeHint(${chI})" style="display:none">💡 Hint</button>`:''}<span class="attempts-badge" id="ch-att-${chI}">0 attempts</span></div><div class="ch-feedback" id="ch-fb-${chI}"></div>${b.hint?`<div class="ch-hint" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}</div></div>`;
 }
 function initChallengeEditor(chI,block){
   const ta=document.getElementById('ch-ta-'+chI);if(!ta||challengeEditors[chI])return;
@@ -645,7 +789,7 @@ function getInteractiveIndex(type,typeIdx){
   let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
   const blocks=content.blocks||[];let iI=0,typeCount=0;
   for(const b of blocks){
-    if(['exercise','challenge','assignment'].includes(b.type)){
+    if(['exercise','challenge','assignment','fillblank'].includes(b.type)){
       if(b.type===type&&typeCount===typeIdx)return iI;
       iI++;if(b.type===type)typeCount++;
     }
@@ -724,13 +868,6 @@ function runTryIt(){const code=tryItEditor?tryItEditor.getValue():'';const frame
 function resetTryIt(){if(tryItEditor){tryItEditor.setValue(tryItOriginalCode);runTryIt();}}
 function closeEditor(){document.getElementById('editorOverlay').classList.remove('open');}
 
-function renderMd(s){
-  return String(s??'')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/_(.+?)_/g,'<em>$1</em>')
-    .replace(/`(.+?)`/g,'<code style="background:#f1f5f9;padding:0.1em 0.4em;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:0.88em">$1</code>');
-}
 function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escHtml(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 init();

@@ -128,6 +128,7 @@ const initDB = async () => {
   await addCol('submissions', 'requirements',        'TEXT');
   await addCol('submissions', 'score',               'INTEGER');
   await addCol('exercise_attempts', 'interactive_index', 'INTEGER DEFAULT 0');
+  await addCol('exercise_attempts', 'answers',           'TEXT');
 
   console.log('Database initialized successfully!');
 };
