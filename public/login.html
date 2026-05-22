@@ -237,7 +237,7 @@
   }
 
   // If already authenticated, skip straight to the right dashboard
-  fetch('/api/me').then(async r => {
+  fetch('/api/me', { credentials: 'include' }).then(async r => {
     if (r.ok) {
       const user = await r.json();
       redirectByRole(user.role);
@@ -273,7 +273,8 @@
       const res = await fetch('/api/login', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password })
+        body:    JSON.stringify({ email, password }),
+        credentials: 'include'
       });
 
       if (!res.ok) {
@@ -312,7 +313,8 @@
       const res = await fetch('/api/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, email, password })
+        body:    JSON.stringify({ name, email, password }),
+        credentials: 'include'
       });
 
       if (!res.ok) {
