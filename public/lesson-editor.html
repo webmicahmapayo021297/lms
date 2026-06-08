@@ -12,6 +12,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <!-- Quill Rich Text Editor -->
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"/>
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
   <style>
     :root{--primary:#4f46e5;--primary-hover:#4338ca;--primary-light:#ede9fe;--success:#10b981;--success-light:#d1fae5;--danger:#ef4444;--danger-light:#fee2e2;--warning:#f59e0b;--warning-light:#fef3c7;--orange:#f97316;--orange-light:#fff7ed;--purple:#7c3aed;--purple-light:#f5f3ff;--bg:#f1f5f9;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 12px rgba(0,0,0,0.1);}
     *{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
@@ -52,6 +55,21 @@
     .block-action-btn{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:0.85rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.1s;}
     .block-action-btn:hover{background:var(--bg);color:var(--text);}.block-action-btn.del:hover{background:var(--danger-light);color:var(--danger);}
     .block-body{padding:1rem;}
+
+    /* ── Quill theory editor ── */
+    .quill-wrapper{border:1.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color 0.15s;}
+    .quill-wrapper:focus-within{border-color:var(--primary);}
+    .quill-wrapper .ql-toolbar{border:none;border-bottom:1.5px solid var(--border);background:#fafbfc;padding:0.4rem 0.5rem;}
+    .quill-wrapper .ql-container{border:none;font-family:'Inter',sans-serif;font-size:0.95rem;}
+    .quill-wrapper .ql-editor{min-height:120px;line-height:1.7;padding:0.75rem 0.85rem;color:var(--text);}
+    .quill-wrapper .ql-editor.ql-blank::before{color:#b0bbc8;font-style:normal;}
+    .quill-wrapper .ql-editor ul,.quill-wrapper .ql-editor ol{padding-left:1.5rem;margin:0.25rem 0 0.5rem;}
+    .quill-wrapper .ql-editor ul li,.quill-wrapper .ql-editor ol li{padding:0.1rem 0;}
+    .quill-wrapper .ql-editor li.ql-indent-1{padding-left:2rem;}
+    .quill-wrapper .ql-editor p{margin-bottom:0.4rem;}
+    .quill-wrapper .ql-editor ul li{list-style:none;}
+    .quill-wrapper .ql-editor ol li{list-style:none;}
+
     .theory-ta{width:100%;min-height:100px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.7;resize:vertical;outline:none;transition:border-color 0.15s;}
     .theory-ta:focus{border-color:var(--primary);}
     .code-lang-row{display:flex;gap:0.65rem;margin-bottom:0.75rem;align-items:center;}
@@ -63,7 +81,6 @@
     .note-type-btn.tip.active{background:var(--warning-light);border-color:var(--warning);color:#92400e;}
     .note-type-btn.info.active{background:#dbeafe;border-color:#3b82f6;color:#1d4ed8;}
     .note-type-btn.warning.active{background:var(--danger-light);border-color:var(--danger);color:#991b1b;}
-    /* Exercise */
     .exercise-builder{display:flex;flex-direction:column;gap:1rem;}
     .ex-label{font-size:0.78rem;font-weight:600;color:var(--text);margin-bottom:0.35rem;}
     .ex-question-ta{width:100%;min-height:70px;padding:0.65rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:0.9rem;line-height:1.6;resize:vertical;outline:none;}
@@ -85,7 +102,6 @@
     .btn-remove:hover{background:var(--danger-light);color:var(--danger);}
     .btn-add-option{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:7px;border:1.5px dashed var(--border);background:transparent;font:inherit;font-size:0.8rem;color:var(--muted);cursor:pointer;transition:border-color 0.15s,color 0.15s;align-self:flex-start;margin-top:0.25rem;}
     .btn-add-option:hover{border-color:var(--primary);color:var(--primary);}
-    /* Challenge */
     .challenge-builder{display:flex;flex-direction:column;gap:1.1rem;}
     .ch-section{display:flex;flex-direction:column;gap:0.4rem;}
     .ch-label{font-size:0.78rem;font-weight:600;color:var(--text);}
@@ -98,7 +114,6 @@
     .match-btn.contains.active{background:#f0fdf4;border-color:var(--success);color:#065f46;}
     .match-btn.exact.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
     .ch-hint-input{width:100%;padding:0.55rem 0.85rem;border:1.5px solid var(--warning);border-radius:8px;font:inherit;font-size:0.875rem;background:var(--warning-light);color:var(--text);outline:none;}
-    /* Assignment */
     .assignment-builder{display:flex;flex-direction:column;gap:1.1rem;}
     .asgn-section{display:flex;flex-direction:column;gap:0.4rem;}
     .asgn-label{font-size:0.78rem;font-weight:600;color:var(--text);}
@@ -118,14 +133,12 @@
     .sub-type-btn.text.active{background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
     .btn-add-req{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:7px;border:1.5px dashed var(--border);background:transparent;font:inherit;font-size:0.8rem;color:var(--muted);cursor:pointer;align-self:flex-start;margin-top:0.25rem;}
     .btn-add-req:hover{border-color:var(--purple);color:var(--purple);}
-    /* Add block row */
     .add-block-row{display:flex;gap:0.65rem;flex-wrap:wrap;padding:1rem;background:var(--card);border-radius:var(--radius);border:2px dashed var(--border);}
     .add-block-btn{display:flex;align-items:center;gap:0.45rem;padding:0.5rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font:inherit;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
     .add-block-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
     .add-block-btn.ex:hover{border-color:#ec4899;color:#9d174d;background:#fce7f3;}
     .add-block-btn.ch:hover{border-color:var(--orange);color:#c2410c;background:var(--orange-light);}
     .add-block-btn.as:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light);}
-    /* Preview */
     .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;user-select:none;}
     .preview-bar:hover{background:#f8fafc;}
     .preview-chevron{font-size:0.75rem;transition:transform 0.2s;}.preview-chevron.open{transform:rotate(180deg);}
@@ -157,7 +170,16 @@
     .preview-as-req{display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;padding:0.25rem 0;}
     .preview-as-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:var(--bg);flex-shrink:0;}
     .preview-as-pts{font-size:0.75rem;color:var(--purple);font-weight:600;background:var(--purple-light);padding:0.2rem 0.6rem;border-radius:99px;margin-top:0.6rem;display:inline-block;}
-    /* Toast */
+    /* preview theory content */
+    .preview-theory-content{font-size:0.95rem;line-height:1.7;margin-bottom:1rem;color:var(--text);}
+    .preview-theory-content p{margin-bottom:0.5rem;}
+    .preview-theory-content ul{padding-left:1.5rem;margin-bottom:0.75rem;}
+    .preview-theory-content ul li{list-style:disc;margin-bottom:0.3rem;}
+    .preview-theory-content ol{padding-left:1.5rem;margin-bottom:0.75rem;}
+    .preview-theory-content ol li{list-style:decimal;margin-bottom:0.3rem;}
+    .preview-theory-content strong{font-weight:700;}
+    .preview-theory-content em{font-style:italic;}
+    .preview-theory-content u{text-decoration:underline;}
     .toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;display:flex;flex-direction:column;gap:0.5rem;}
     .toast{padding:0.7rem 1.1rem;border-radius:10px;font-size:0.85rem;font-weight:500;color:#fff;box-shadow:var(--shadow-md);animation:slideIn 0.25s ease;}
     .toast.success{background:#065f46;}.toast.error{background:#7f1d1d;}
@@ -218,7 +240,7 @@
 </div>
 <div class="toast-container" id="toastContainer"></div>
 <script>
-let lessonId=null,blocks=[],blockCount=0,cmEditors={},optionCounters={},reqCounters={};
+let lessonId=null,blocks=[],blockCount=0,cmEditors={},quillEditors={},optionCounters={},reqCounters={},chReqCounters={};
 const LETTERS=['A','B','C','D','E','F'];
 
 async function init(){
@@ -266,8 +288,66 @@ function addBlock(type,data={}){
   document.getElementById('blocksContainer').appendChild(el);
   if(type==='code')setTimeout(()=>initCM(id,data.lang||'htmlmixed'),50);
   if(type==='challenge')setTimeout(()=>initChallengeCM(id,data),50);
+  if(type==='challenge')setTimeout(()=>initChReqList(id,data.requirements||[]),60);
+  if(type==='challenge')setTimeout(()=>initChQuill(id,data.instructions||''),80);
   if(type==='exercise')initOptions(id,data.options||[]);
   if(type==='assignment')initReqList(id,data.requirements||[]);
+  if(type==='theory')setTimeout(()=>initQuill(id,data.content||''),50);
+}
+
+// ── Challenge Quill initializer ──
+function initChQuill(id, existingContent){
+  const el=document.getElementById('chquill-'+id);
+  if(!el||quillEditors['ch-'+id])return;
+  quillEditors['ch-'+id]=new Quill('#chquill-'+id,{
+    theme:'snow',
+    placeholder:'Write challenge instructions…',
+    modules:{
+      toolbar:[
+        ['bold','italic','underline'],
+        [{'list':'ordered'},{'list':'bullet'}],
+        [{'header':[2,3,false]}],
+        ['clean']
+      ]
+    }
+  });
+  if(existingContent) quillEditors['ch-'+id].root.innerHTML=existingContent;
+  quillEditors['ch-'+id].on('text-change',()=>{
+    const hidden=document.getElementById('chi-'+id);
+    if(hidden) hidden.value=quillEditors['ch-'+id].root.innerHTML;
+  });
+  const hidden=document.getElementById('chi-'+id);
+  if(hidden&&existingContent) hidden.value=existingContent;
+}
+
+// ── Quill initializer ──
+function initQuill(id, existingContent){
+  const el=document.getElementById('quill-'+id);
+  if(!el||quillEditors[id])return;
+  quillEditors[id]=new Quill('#quill-'+id,{
+    theme:'snow',
+    placeholder:'Write lesson content…',
+    modules:{
+      toolbar:[
+        ['bold','italic','underline'],
+        [{'list':'ordered'},{'list':'bullet'}],
+        [{'header':[2,3,false]}],
+        ['clean']
+      ]
+    }
+  });
+  // Load existing HTML content
+  if(existingContent){
+    quillEditors[id].root.innerHTML=existingContent;
+  }
+  // Sync to hidden input on every change
+  quillEditors[id].on('text-change',()=>{
+    const hidden=document.getElementById('bc-'+id);
+    if(hidden)hidden.value=quillEditors[id].root.innerHTML;
+  });
+  // Set initial hidden input value
+  const hidden=document.getElementById('bc-'+id);
+  if(hidden&&existingContent)hidden.value=existingContent;
 }
 
 function blockHeader(id,type,data){
@@ -278,47 +358,170 @@ function blockHeader(id,type,data){
 
 function buildBlockHTML(id,type,data){
   const hdr=blockHeader(id,type,data);
-  if(type==='theory')return hdr+`<div class="block-body"><textarea class="theory-ta" id="bc-${id}" placeholder="Write lesson content. Each new line = one bullet point.">${esc(data.content||'')}</textarea><div style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem">💡 Each line → separate bullet point</div></div>`;
+
+  // ── THEORY: Quill rich text editor ──
+  if(type==='theory'){
+    return hdr+`<div class="block-body">
+      <div class="quill-wrapper">
+        <div id="quill-${id}"></div>
+      </div>
+      <input type="hidden" id="bc-${id}" value="${esc(data.content||'')}"/>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.4rem">💡 Use the toolbar to bold, italicize, or add bullet points</div>
+    </div>`;
+  }
+
   if(type==='code'){const lang=data.lang||'htmlmixed';return hdr+`<div class="block-body"><div class="code-lang-row"><label style="font-size:0.78rem;font-weight:600;color:var(--muted)">Language:</label><select class="lang-select" id="blang-${id}" onchange="updateCMLang(${id})"><option value="htmlmixed" ${lang==='htmlmixed'?'selected':''}>HTML</option><option value="javascript" ${lang==='javascript'?'selected':''}>JavaScript</option><option value="css" ${lang==='css'?'selected':''}>CSS</option><option value="text/plain" ${lang==='text/plain'?'selected':''}>Plain Text</option></select><label class="tryit-toggle"><span>Enable "Try it Yourself"</span><label class="toggle" style="margin-left:0.5rem"><input type="checkbox" id="btryit-${id}" ${data.tryit?'checked':''}/><span class="toggle-slider"></span></label></label></div><textarea id="bcm-${id}">${esc(data.code||'')}</textarea></div>`;}
   if(type==='note'){const nt=data.noteType||'tip';return hdr+`<div class="block-body"><div class="note-type-row"><button class="note-type-btn tip ${nt==='tip'?'active':''}" onclick="setNoteType(${id},'tip')">💡 Tip</button><button class="note-type-btn info ${nt==='info'?'active':''}" onclick="setNoteType(${id},'info')">ℹ Info</button><button class="note-type-btn warning ${nt==='warning'?'active':''}" onclick="setNoteType(${id},'warning')">⚠ Warning</button><input type="hidden" id="bnotetype-${id}" value="${nt}"/></div><textarea class="theory-ta" id="bc-${id}" placeholder="Note text…">${esc(data.content||'')}</textarea></div>`;}
   if(type==='tryit')return hdr+`<div class="block-body"><p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">Standalone "Try it Yourself" editor for students.</p><textarea class="theory-ta" id="bcm-${id}" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem" placeholder="Optional starter HTML…">${esc(data.code||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div>`;
   if(type==='exercise')return hdr+`<div class="block-body"><div class="exercise-builder"><div class="form-field"><label class="ex-label">Question *</label><textarea class="ex-question-ta" id="exq-${id}" placeholder="e.g. What does HTML stand for?">${esc(data.question||'')}</textarea></div><div class="form-field"><label class="ex-label">Answer Options</label><div class="correct-hint">Click the <span>circle</span> next to the correct answer.</div><div class="options-list" id="opts-${id}"></div><button class="btn-add-option" onclick="addOption(${id})">＋ Add Option</button></div><div class="form-field"><label class="ex-label">💡 Hint (shown after wrong answer)</label><input class="ex-hint-input" id="exhint-${id}" type="text" placeholder="e.g. Think about what HT means…" value="${esc(data.hint||'')}"/></div></div></div>`;
-  if(type==='challenge'){const mm=data.matchMode||'contains';return hdr+`<div class="block-body"><div class="challenge-builder"><div class="ch-section"><label class="ch-label">Instructions *</label><textarea class="ch-instructions" id="chi-${id}" placeholder="e.g. Create an h1 that says Hello World">${esc(data.instructions||'')}</textarea></div><div class="ch-section"><label class="ch-label">Starter Code</label><textarea id="chta-${id}" style="display:none">${esc(data.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea><div id="chcm-${id}"></div></div><div class="ch-section"><label class="ch-label">Expected Output *</label><div class="ch-hint-text">Text the student's rendered page must contain to pass.</div><textarea class="expected-ta" id="chex-${id}" placeholder="e.g. Hello World">${esc(data.expectedOutput||'')}</textarea></div><div class="ch-section"><label class="ch-label">Match Mode</label><div class="match-mode-row"><button class="match-btn contains ${mm==='contains'?'active':''}" onclick="setMatchMode(${id},'contains')">Contains</button><button class="match-btn exact ${mm==='exact'?'active':''}" onclick="setMatchMode(${id},'exact')">Exact</button><input type="hidden" id="chmm-${id}" value="${mm}"/></div></div><div class="ch-section"><label class="ch-label">💡 Hint</label><input class="ch-hint-input" id="chhint-${id}" type="text" placeholder="Hint shown after failed attempt…" value="${esc(data.hint||'')}"/></div></div></div>`;}
+  if(type==='challenge'){
+    const mm=data.matchMode||'contains';
+    return hdr+`<div class="block-body"><div class="challenge-builder">
+
+      <div class="ch-section">
+        <label class="ch-label">Challenge Title *</label>
+        <input class="asgn-input" id="chlabel-${id}" type="text" placeholder="e.g. HTML Basics" value="${esc(data.label||'')}"/>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Instructions</label>
+        <div class="ch-hint-text">Rich text — bold, bullets, etc.</div>
+        <div class="quill-wrapper" style="margin-top:0.4rem">
+          <div id="chquill-${id}"></div>
+        </div>
+        <input type="hidden" id="chi-${id}" value="${esc(data.instructions||'')}"/>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Starter Code <span style="font-weight:400;color:var(--muted)">(pre-filled in student's Code tab)</span></label>
+        <textarea id="chta-${id}" style="display:none">${esc(data.starterCode||'<!-- Build your HTML page here -->')}</textarea>
+        <div id="chcm-${id}"></div>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Solution Code <span style="font-weight:400;color:var(--muted)">(shown when student clicks Solution tab)</span></label>
+        <textarea id="chsolcm-${id}" style="display:none">${esc(data.solutionCode||'')}</textarea>
+        <div id="chsolwrap-${id}"></div>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Expected Output *</label>
+        <div class="ch-hint-text">Text the student's rendered page must contain to pass.</div>
+        <textarea class="expected-ta" id="chex-${id}" placeholder="e.g. Hello World">${esc(data.expectedOutput||'')}</textarea>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Match Mode</label>
+        <div class="match-mode-row">
+          <button class="match-btn contains ${mm==='contains'?'active':''}" onclick="setMatchMode(${id},'contains')">Contains</button>
+          <button class="match-btn exact ${mm==='exact'?'active':''}" onclick="setMatchMode(${id},'exact')">Exact</button>
+          <input type="hidden" id="chmm-${id}" value="${mm}"/>
+        </div>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">Checklist Requirements <span style="font-weight:400;color:var(--muted)">(each = one ✓ checkbox student sees)</span></label>
+        <div class="ch-hint-text">Each item is checked individually when student clicks Check Code.</div>
+        <div class="req-list" id="chreqlist-${id}" style="margin-top:0.5rem"></div>
+        <button class="btn-add-req" onclick="addChReq(${id})" style="border-color:var(--orange);color:#c2410c">＋ Add Checklist Item</button>
+      </div>
+
+      <div class="ch-section">
+        <label class="ch-label">💡 Hint <span style="font-weight:400;color:var(--muted)">(shown after first failed attempt)</span></label>
+        <input class="ch-hint-input" id="chhint-${id}" type="text" placeholder="e.g. Make sure you added the h1 tag inside body…" value="${esc(data.hint||'')}"/>
+      </div>
+
+    </div></div>`;
+  }
   if(type==='assignment'){const st=data.submissionType||'code',pts=data.points||100;return hdr+`<div class="block-body"><div class="assignment-builder"><div class="asgn-section"><label class="asgn-label">Assignment Title *</label><input class="asgn-input" id="asgntitle-${id}" type="text" placeholder="e.g. Module 1 Major Assignment" value="${esc(data.assignmentTitle||'')}"/></div><div class="asgn-section"><label class="asgn-label">Instructions *</label><div class="asgn-hint">Describe what the student needs to build and submit.</div><textarea class="asgn-ta" id="asgnins-${id}" placeholder="e.g. Build a complete webpage about your favorite topic…">${esc(data.instructions||'')}</textarea></div><div class="asgn-section"><label class="asgn-label">Requirements Checklist</label><div class="asgn-hint">Each item shows as a checkbox the student sees before submitting.</div><div class="req-list" id="reqlist-${id}" style="margin-top:0.5rem"></div><button class="btn-add-req" onclick="addReq(${id})">＋ Add Requirement</button></div><div style="display:flex;gap:1rem;flex-wrap:wrap"><div class="asgn-section" style="flex:1;min-width:110px"><label class="asgn-label">Points</label><input class="asgn-input" id="asgnpts-${id}" type="number" min="1" value="${pts}"/></div><div class="asgn-section" style="flex:2;min-width:200px"><label class="asgn-label">Submission Type</label><div class="sub-type-row"><button class="sub-type-btn code ${st==='code'?'active':''}" onclick="setSubType(${id},'code')">💻 Code</button><button class="sub-type-btn text ${st==='text'?'active':''}" onclick="setSubType(${id},'text')">📝 Text</button><input type="hidden" id="asgntype-${id}" value="${st}"/></div></div></div></div></div>`;}
   return hdr;
 }
 
-/* CM helpers */
 function initCM(id,lang){const ta=document.getElementById('bcm-'+id);if(!ta||cmEditors[id])return;cmEditors[id]=CodeMirror.fromTextArea(ta,{mode:lang,theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});}
-function initChallengeCM(id,data){const wrap=document.getElementById('chcm-'+id);if(!wrap||cmEditors['ch-'+id])return;const ta=document.createElement('textarea');ta.id='chcmta-'+id;ta.value=data.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>';wrap.appendChild(ta);cmEditors['ch-'+id]=CodeMirror.fromTextArea(ta,{mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});}
+function initChallengeCM(id,data){
+  // Starter Code editor
+  const wrap=document.getElementById('chcm-'+id);
+  if(wrap&&!cmEditors['ch-'+id]){
+    const ta=document.createElement('textarea');
+    ta.id='chcmta-'+id;
+    ta.value=data.starterCode||'<!-- Build your HTML page here -->';
+    wrap.appendChild(ta);
+    cmEditors['ch-'+id]=CodeMirror.fromTextArea(ta,{mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});
+    cmEditors['ch-'+id].getWrapperElement().style.minHeight='140px';
+  }
+  // Solution Code editor
+  const solWrap=document.getElementById('chsolwrap-'+id);
+  if(solWrap&&!cmEditors['chsol-'+id]){
+    const solTa=document.createElement('textarea');
+    solTa.id='chsolcmta-'+id;
+    solTa.value=data.solutionCode||'';
+    solWrap.appendChild(solTa);
+    cmEditors['chsol-'+id]=CodeMirror.fromTextArea(solTa,{mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2});
+    cmEditors['chsol-'+id].getWrapperElement().style.minHeight='140px';
+  }
+}
 function updateCMLang(id){if(cmEditors[id])cmEditors[id].setOption('mode',document.getElementById('blang-'+id).value);}
 function setNoteType(id,type){document.getElementById('bnotetype-'+id).value=type;document.querySelectorAll('#block-'+id+' .note-type-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(type))b.classList.add('active');});}
 function setMatchMode(id,mode){document.getElementById('chmm-'+id).value=mode;document.querySelectorAll('#block-'+id+' .match-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(mode))b.classList.add('active');});}
 
-/* Options */
 function initOptions(bId,existing){optionCounters[bId]=0;if(existing.length)existing.forEach(o=>addOption(bId,o));else{addOption(bId);addOption(bId);addOption(bId);}}
 function addOption(bId,data={}){const list=document.getElementById('opts-'+bId);if(!list)return;const idx=++optionCounters[bId];const letter=LETTERS[idx-1]||String(idx);const row=document.createElement('div');row.className='option-row'+(data.correct?' is-correct':'');row.id='opt-'+bId+'-'+idx;row.innerHTML=`<div class="opt-letter">${letter}</div><input class="opt-text" type="text" id="opttext-${bId}-${idx}" placeholder="Option ${letter}…" value="${esc(data.text||'')}"/><input class="correct-radio" type="radio" name="correct-${bId}" id="optcorrect-${bId}-${idx}" value="${idx}" ${data.correct?'checked':''} onchange="markCorrect(${bId},${idx})"/><button class="btn-remove" onclick="removeRow('opt-${bId}-${idx}')">✕</button>`;list.appendChild(row);}
 function markCorrect(bId,cIdx){document.querySelectorAll('#opts-'+bId+' .option-row').forEach(r=>r.classList.remove('is-correct'));document.getElementById('opt-'+bId+'-'+cIdx)?.classList.add('is-correct');}
 
-/* Req list */
 function initReqList(bId,existing){reqCounters[bId]=0;existing.forEach(r=>addReq(bId,r));}
 function addReq(bId,text=''){const list=document.getElementById('reqlist-'+bId);if(!list)return;const idx=++reqCounters[bId];const row=document.createElement('div');row.className='req-row';row.id='req-'+bId+'-'+idx;row.innerHTML=`<div class="req-num">${idx}</div><input class="req-input" type="text" id="reqtext-${bId}-${idx}" placeholder="e.g. DOCTYPE declaration present" value="${esc(typeof text==='string'?text:'')}"/><button class="btn-remove" onclick="removeRow('req-${bId}-${idx}')">✕</button>`;list.appendChild(row);}
 function removeRow(id){document.getElementById(id)?.remove();}
+
+function initChReqList(bId,existing){chReqCounters[bId]=0;(existing||[]).forEach(r=>addChReq(bId,r));}
+function addChReq(bId,text=''){
+  const list=document.getElementById('chreqlist-'+bId);if(!list)return;
+  const idx=++chReqCounters[bId];
+  const row=document.createElement('div');row.className='req-row';row.id='chreq-'+bId+'-'+idx;
+  row.innerHTML=`<div class="req-num" style="background:#fff7ed;border-color:#fed7aa;color:#c2410c">${idx}</div><input class="req-input" type="text" id="chreqtext-${bId}-${idx}" placeholder="e.g. Add the DOCTYPE declaration" value="${esc(typeof text==='string'?text:'')}"/><button class="btn-remove" onclick="removeRow('chreq-${bId}-${idx}')">✕</button>`;
+  list.appendChild(row);
+}
 function setSubType(id,type){document.getElementById('asgntype-'+id).value=type;document.querySelectorAll('#block-'+id+' .sub-type-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(type))b.classList.add('active');});}
 
-function deleteBlock(id){blocks=blocks.filter(b=>b.id!==id);document.getElementById('block-'+id)?.remove();delete cmEditors[id];delete cmEditors['ch-'+id];if(!blocks.length)document.getElementById('emptyMsg').style.display='';}
+function deleteBlock(id){
+  blocks=blocks.filter(b=>b.id!==id);
+  document.getElementById('block-'+id)?.remove();
+  delete cmEditors[id];
+  delete cmEditors['ch-'+id];
+  delete quillEditors[id];
+  delete chReqCounters[id];
+  delete quillEditors['ch-'+id];
+  delete cmEditors['chsol-'+id];
+  if(!blocks.length)document.getElementById('emptyMsg').style.display='';
+}
 function moveBlock(id,dir){const i=blocks.findIndex(b=>b.id===id),j=i+dir;if(j<0||j>=blocks.length)return;[blocks[i],blocks[j]]=[blocks[j],blocks[i]];const c=document.getElementById('blocksContainer');const a=document.getElementById('block-'+blocks[i].id);const b=document.getElementById('block-'+blocks[j].id);if(dir===-1)c.insertBefore(b,a);else c.insertBefore(a,b.nextSibling);}
 
 function collectBlocks(){
   return [...document.getElementById('blocksContainer').children].map(el=>{
     const id=parseInt(el.id.replace('block-',''));const block=blocks.find(b=>b.id===id);if(!block)return null;
     const label=document.getElementById('blabel-'+id)?.value||'';const base={type:block.type,label};
-    if(block.type==='theory')return{...base,content:document.getElementById('bc-'+id)?.value||''};
+    if(block.type==='theory'){
+      // Get from Quill editor if available, else from hidden input
+      const content=quillEditors[id]?quillEditors[id].root.innerHTML:(document.getElementById('bc-'+id)?.value||'');
+      return{...base,content};
+    }
     if(block.type==='code')return{...base,lang:document.getElementById('blang-'+id)?.value||'htmlmixed',code:cmEditors[id]?cmEditors[id].getValue():(document.getElementById('bcm-'+id)?.value||''),tryit:document.getElementById('btryit-'+id)?.checked||false};
     if(block.type==='note')return{...base,noteType:document.getElementById('bnotetype-'+id)?.value||'tip',content:document.getElementById('bc-'+id)?.value||''};
     if(block.type==='tryit')return{...base,code:document.getElementById('bcm-'+id)?.value||''};
     if(block.type==='exercise'){const question=document.getElementById('exq-'+id)?.value?.trim()||'';const hint=document.getElementById('exhint-'+id)?.value?.trim()||'';const optList=document.getElementById('opts-'+id);const options=[];if(optList)optList.querySelectorAll('.option-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('opttext-'+id+'-'+idx)?.value?.trim()||'';const radio=document.getElementById('optcorrect-'+id+'-'+idx);if(text)options.push({text,correct:radio?.checked||false});});return{...base,question,hint,options};}
-    if(block.type==='challenge'){const sc=cmEditors['ch-'+id]?cmEditors['ch-'+id].getValue():(document.getElementById('chcmta-'+id)?.value||'');return{...base,instructions:document.getElementById('chi-'+id)?.value?.trim()||'',starterCode:sc,expectedOutput:document.getElementById('chex-'+id)?.value?.trim()||'',matchMode:document.getElementById('chmm-'+id)?.value||'contains',hint:document.getElementById('chhint-'+id)?.value?.trim()||''};}
+    if(block.type==='challenge'){
+      const sc   = cmEditors['ch-'+id]    ? cmEditors['ch-'+id].getValue()    : (document.getElementById('chcmta-'+id)?.value||'');
+      const sol  = cmEditors['chsol-'+id] ? cmEditors['chsol-'+id].getValue() : (document.getElementById('chsolcmta-'+id)?.value||'');
+      const instrContent = quillEditors['ch-'+id] ? quillEditors['ch-'+id].root.innerHTML : (document.getElementById('chi-'+id)?.value||'');
+      const chReqList = document.getElementById('chreqlist-'+id);
+      const chReqs = [];
+      if(chReqList) chReqList.querySelectorAll('.req-row').forEach(row=>{
+        const parts=row.id.split('-'); const idx=parts[parts.length-1];
+        const text=document.getElementById('chreqtext-'+id+'-'+idx)?.value?.trim()||'';
+        if(text) chReqs.push(text);
+      });
+      const chTitle = document.getElementById('chlabel-'+id)?.value?.trim()||'';
+      return{...base,label:chTitle,instructions:instrContent,starterCode:sc,solutionCode:sol,expectedOutput:document.getElementById('chex-'+id)?.value?.trim()||'',matchMode:document.getElementById('chmm-'+id)?.value||'contains',hint:document.getElementById('chhint-'+id)?.value?.trim()||'',requirements:chReqs};
+    }
     if(block.type==='assignment'){const reqList=document.getElementById('reqlist-'+id);const reqs=[];if(reqList)reqList.querySelectorAll('.req-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('reqtext-'+id+'-'+idx)?.value?.trim()||'';if(text)reqs.push(text);});return{...base,assignmentTitle:document.getElementById('asgntitle-'+id)?.value?.trim()||'',instructions:document.getElementById('asgnins-'+id)?.value?.trim()||'',points:parseInt(document.getElementById('asgnpts-'+id)?.value)||100,submissionType:document.getElementById('asgntype-'+id)?.value||'code',requirements:reqs};}
     return base;
   }).filter(Boolean);
@@ -351,17 +554,30 @@ function buildPreview(){
   const f=document.getElementById('previewFrame');const title=document.getElementById('lessonTitle').value||'Lesson Preview';const blist=collectBlocks();
   let html=`<div class="preview-lesson-title">${esc(title)}</div>`;
   for(const b of blist){
-    if(b.type==='theory')(b.content||'').split('\n').filter(l=>l.trim()).forEach(l=>html+=`<p class="preview-theory">${esc(l)}</p>`);
+    // ── Theory: render HTML directly ──
+    if(b.type==='theory'){
+      if(b.label)html+=`<h2 style="font-size:1.1rem;font-weight:700;margin:1rem 0 0.5rem;padding-bottom:0.3rem;border-bottom:2px solid var(--border)">${esc(b.label)}</h2>`;
+      html+=`<div class="preview-theory-content">${b.content||''}</div>`;
+    }
     if(b.type==='code'){if(b.label)html+=`<div class="preview-code-label">${esc(b.label)}</div>`;html+=`<pre class="preview-code">${escHtml(b.code)}</pre>`;if(b.tryit)html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;}
     if(b.type==='note')html+=`<div class="preview-note ${b.noteType||'tip'}">${esc(b.content)}</div>`;
     if(b.type==='tryit')html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;
     if(b.type==='exercise'){const opts=(b.options||[]).map((o,i)=>`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`).join('');html+=`<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise</div><div class="preview-ex-q">${esc(b.question)}</div>${opts}${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;}
     if(b.type==='challenge'){
       const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map(l=>{
-        if(/^\d+\. /.test(l))return`<div style="display:flex;align-items:flex-start;gap:0.6rem;font-size:0.9rem;margin-bottom:0.45rem;line-height:1.6"><span style="min-width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem">${l.match(/^(\d+)/)[1]}</span>${escHtml(l.replace(/^\d+\. /,''))}</div>`;
-        return`<div style="font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6">${escHtml(l)}</div>`;
+        const m=/^(\d+)[.): ]+(.+)$/.exec(l);
+        if(m)return`<div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;margin-bottom:6px;line-height:1.5"><span style="min-width:22px;width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;font-size:0.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${m[1]}</span>${escHtml(m[2])}</div>`;
+        return`<div style="font-size:0.88rem;margin-bottom:5px;line-height:1.6;color:#475569;">${escHtml(l)}</div>`;
       }).join('');
-      html+=`<div class="preview-challenge"><div class="preview-ch-label">🏆 Code Challenge</div>${instrLines}<div class="preview-ch-expected">✅ Must contain: <code style="background:#fff;padding:0.15em 0.4em;border-radius:4px;font-family:monospace;font-size:0.82rem">${escHtml(b.expectedOutput)}</code></div>${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;
+      const reqs=(b.requirements||[]).map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:0.4rem 0.6rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.82rem;margin-bottom:4px;"><span style="width:18px;height:18px;border-radius:4px;border:1.5px solid #e2e8f0;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"></span>${escHtml(r)}</div>`).join('');
+      html+=`<div class="preview-challenge">
+        <div class="preview-ch-label">🏆 Code Challenge</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">${esc(b.label||'Code Challenge')}</div>
+        ${instrLines?`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.75rem;">${instrLines}</div>`:''}
+        <div class="preview-ch-expected">✅ Must contain: <code style="background:#fff;padding:0.15em 0.4em;border-radius:4px;font-family:monospace;font-size:0.82rem">${escHtml(b.expectedOutput)}</code></div>
+        ${reqs?`<div style="margin-top:0.5rem;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:0.35rem;">Checklist</div>${reqs}`:''}
+        ${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}
+      </div>`;
     }
     if(b.type==='assignment'){const reqs=(b.requirements||[]).map(r=>`<div class="preview-as-req"><div class="preview-as-check"></div>${esc(r)}</div>`).join('');html+=`<div class="preview-assignment"><div class="preview-as-label">📋 Assignment</div><div class="preview-as-title">${esc(b.assignmentTitle)}</div><div class="preview-as-instructions">${esc(b.instructions)}</div>${reqs}<div class="preview-as-pts">${b.points} pts · ${b.submissionType==='code'?'💻 Code':'📝 Text'}</div></div>`;}
   }

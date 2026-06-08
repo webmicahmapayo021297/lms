@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -440,20 +442,29 @@ app.post('/api/exercises/check', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
     const { lesson_id, exercise_index, interactive_index, answer_index, passed } = req.body;
 
-    if (passed) {
-      await run(`
-        INSERT INTO exercise_attempts
-          (user_id, lesson_id, exercise_index, interactive_index, answer_index, passed, attempted_at)
-        VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
-        ON CONFLICT(user_id, lesson_id, interactive_index)
-        DO UPDATE SET answer_index=excluded.answer_index, passed=1, attempted_at=CURRENT_TIMESTAMP
-      `, [userId, lesson_id, exercise_index ?? 0, interactive_index ?? exercise_index ?? 0, answer_index ?? 0]);
+    const iIdx = interactive_index ?? exercise_index ?? 0;
+    const eIdx = exercise_index ?? 0;
+    const aIdx = answer_index ?? 0;
 
+    // Always upsert — never downgrade a previously passed attempt
+    await run(`
+      INSERT INTO exercise_attempts
+        (user_id, lesson_id, exercise_index, interactive_index, answer_index, passed, attempted_at)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id, lesson_id, interactive_index)
+      DO UPDATE SET
+        answer_index = excluded.answer_index,
+        attempted_at = CURRENT_TIMESTAMP,
+        passed       = CASE WHEN exercise_attempts.passed = 1 THEN 1 ELSE excluded.passed END
+    `, [userId, lesson_id, eIdx, iIdx, aIdx, passed ? 1 : 0]);
+
+    // If passed, check if all interactives in the lesson are now done → auto-complete lesson
+    if (passed) {
       const lesson = await get('SELECT * FROM lessons WHERE id = ?', [lesson_id]);
       if (lesson) {
-        let content = {};
-        try { content = JSON.parse(lesson.content || '{}'); } catch (_) {}
-        const totalInteractive = (content.blocks || []).filter(b =>
+        let lessonContent = {};
+        try { lessonContent = JSON.parse(lesson.content || '{}'); } catch (_) {}
+        const totalInteractive = (lessonContent.blocks || []).filter(b =>
           ['exercise', 'challenge', 'assignment'].includes(b.type)
         ).length;
         if (totalInteractive > 0) {
@@ -468,7 +479,8 @@ app.post('/api/exercises/check', requireAuth, async (req, res) => {
         }
       }
     }
-    res.json({ success: true });
+
+    res.json({ success: true, passed: !!passed });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
