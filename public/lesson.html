@@ -41,9 +41,22 @@
     .main{margin-left:var(--sidebar-w);flex:1;max-width:860px;padding:2rem 2.5rem 4rem;}
     .lesson-meta{font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;}
     .lesson-title{font-size:2rem;font-weight:700;margin-bottom:1.5rem;line-height:1.2;}
-    .theory-list{list-style:none;margin-bottom:1.5rem;}
-    .theory-list li{padding:0.4rem 0 0.4rem 1.5rem;position:relative;font-size:0.95rem;line-height:1.6;}
-    .theory-list li::before{content:'▸';position:absolute;left:0;color:var(--green);}
+
+    /* ── Theory content: rich HTML from Quill ── */
+    .theory-content{font-size:0.95rem;line-height:1.7;margin-bottom:1.5rem;color:var(--text);display:block;}
+    .theory-content p{margin-bottom:0.65rem;display:block;}
+    .theory-content p:last-child{margin-bottom:0;}
+    .theory-content p:empty{display:none;}
+    .theory-content ul{padding-left:1.5rem;margin-bottom:0.75rem;}
+    .theory-content ul li{list-style:disc;margin-bottom:0.3rem;}
+    .theory-content ol{padding-left:1.5rem;margin-bottom:0.75rem;}
+    .theory-content ol li{list-style:decimal;margin-bottom:0.3rem;}
+    .theory-content strong{font-weight:700;}
+    .theory-content em{font-style:italic;}
+    .theory-content u{text-decoration:underline;}
+    .theory-content h2{font-size:1.2rem;font-weight:700;margin:1rem 0 0.5rem;}
+    .theory-content h3{font-size:1rem;font-weight:700;margin:0.75rem 0 0.4rem;}
+
     .note-box{border-radius:8px;padding:0.9rem 1.1rem;margin:1.25rem 0;font-size:0.88rem;line-height:1.6;border-left:4px solid;}
     .note-box.tip{background:var(--yellow-bg);border-color:var(--yellow-border);}
     .note-box.info{background:var(--blue-bg);border-color:var(--blue-border);}
@@ -91,41 +104,67 @@
     .exercise-feedback.error{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
     .hint-box{display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:var(--yellow-bg);border:1px solid #f59e0b;border-radius:8px;font-size:0.875rem;color:#78350f;line-height:1.6;}
     .hint-box.show{display:block;}
-    .challenge-card{background:var(--card);border-radius:12px;border:2px solid #fed7aa;padding:0;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;}
+    /* ── W3Schools-style Challenge Card ── */
+    .challenge-card{background:var(--card);border-radius:12px;border:2px solid #e2e8f0;padding:0;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
     .challenge-card.passed{border-color:var(--green);}
-    .challenge-header{padding:1.1rem 1.5rem;background:var(--orange-light);border-bottom:2px solid #fed7aa;}
-    .challenge-card.passed .challenge-header{background:var(--green-light);border-bottom-color:#a7f3d0;}
-    .challenge-badge{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#c2410c;margin-bottom:0.35rem;}
-    .challenge-card.passed .challenge-badge{color:var(--green-dark);}
-    .challenge-title{font-size:1rem;font-weight:700;}
-    .challenge-body{padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
-    .challenge-instructions{font-size:0.9rem;line-height:1.7;margin-bottom:0.4rem;display:block;}
-    .challenge-body>div{display:block;}
-    .ch-step{display:flex;flex-direction:row;align-items:flex-start;gap:0.65rem;font-size:0.9rem;margin-bottom:0.5rem;line-height:1.6;width:100%;}
-    .ch-step-num{min-width:24px;width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0.1rem;}
-    .ch-step-text{flex:1;}
-    .challenge-editor-wrap{border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
-    .challenge-editor-header{background:#1e1e2e;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.75rem;}
-    .challenge-editor-label{font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.05em;}
-    .btn-run-ch{padding:0.3rem 0.9rem;background:var(--orange);color:#fff;border:none;border-radius:5px;font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer;margin-left:auto;}
-    .btn-run-ch:hover{background:var(--orange-dark);}
-    .btn-reset-ch{padding:0.3rem 0.75rem;background:rgba(255,255,255,0.1);color:#ccc;border:1px solid rgba(255,255,255,0.2);border-radius:5px;font:inherit;font-size:0.78rem;cursor:pointer;}
-    .challenge-split{display:flex;min-height:200px;}
-    .ch-code-pane{flex:1;border-right:2px solid #333;overflow:hidden;}
-    .ch-preview-pane{flex:1;background:#fff;}
-    .ch-preview-pane iframe{width:100%;height:100%;border:none;min-height:200px;}
+    .ch-top{padding:1.25rem 1.5rem 1rem;}
+    .ch-badge-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;}
+    .ch-badge{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--orange);display:flex;align-items:center;gap:0.3rem;}
+    .ch-badge.passed-badge{color:var(--green-dark);}
+    .ch-main-title{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:0.25rem;}
+    .ch-subtitle{font-size:0.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;}
+    .ch-instr-box{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem;}
+    .ch-instr-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.65rem;}
+    /* Split editor area */
+    .ch-split-wrap{display:flex;border-top:1px solid var(--border);min-height:260px;}
+    .ch-editor-side{flex:1;display:flex;flex-direction:column;border-right:1px solid #333;min-width:0;}
+    .ch-editor-tabs{background:#1a1a2e;display:flex;align-items:center;padding:0 1rem;gap:0;border-bottom:1px solid #333;}
+    .ch-tab{padding:0.6rem 1rem;font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.45);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+    .ch-tab.active{color:#fff;border-bottom-color:var(--green);}
+    .ch-check-btn{margin-left:auto;padding:0.4rem 1.1rem;background:var(--green);color:#fff;border:none;border-radius:6px;font:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;transition:background 0.15s;}
+    .ch-check-btn:hover:not(:disabled){background:var(--green-dark);}
+    .ch-check-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .ch-check-btn.passed-btn{background:#0f766e;}
+    .ch-code-area{flex:1;overflow:hidden;position:relative;}
+    .ch-solution-area{flex:1;overflow:hidden;display:none;background:#1e1e2e;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:#a5b4fc;line-height:1.6;overflow-y:auto;}
+    .ch-result-side{flex:1;display:flex;flex-direction:column;min-width:0;}
+    .ch-result-header{background:#1a1a2e;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid #333;}
+    .ch-mac-dots{display:flex;gap:5px;}
+    .ch-dot{width:12px;height:12px;border-radius:50%;}
+    .ch-dot.red{background:#ff5f57;}.ch-dot.yellow{background:#febc2e;}.ch-dot.green{background:#28c840;}
+    .ch-result-label{font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.7);margin-left:0.25rem;}
+    .ch-result-frame{flex:1;background:#fff;border:none;width:100%;min-height:220px;}
+    .ch-result-placeholder{flex:1;background:#fff;padding:1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:#10b981;line-height:1.6;}
+    /* Feedback bar */
+    .ch-feedback-bar{padding:0.85rem 1.5rem;font-size:0.875rem;font-weight:500;display:none;border-top:1px solid var(--border);}
+    .ch-feedback-bar.show{display:block;}
+    .ch-feedback-bar.success{background:#f0fdf4;color:#065f46;}
+    .ch-feedback-bar.error{background:#fef2f2;color:#991b1b;}
+    .ch-feedback-bar.warning{background:#fffbeb;color:#92400e;}
+    /* Checklist */
+    .ch-checklist{padding:1rem 1.5rem;border-top:1px solid var(--border);}
+    .ch-checklist-title{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.75rem;}
+    .ch-check-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid var(--border);background:#fafbfc;margin-bottom:0.4rem;font-size:0.875rem;color:var(--text);transition:all 0.2s;}
+    .ch-check-item.checked{background:#f0fdf4;border-color:#a7f3d0;color:#065f46;}
+    .ch-check-box{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:all 0.2s;}
+    .ch-check-item.checked .ch-check-box{background:var(--green);border-color:var(--green);color:#fff;}
+    .ch-hint-bar{display:none;padding:0.75rem 1.5rem;background:var(--yellow-bg);border-top:1px solid #f59e0b;font-size:0.875rem;color:#78350f;line-height:1.6;}
+    .ch-hint-bar.show{display:block;}
     .CodeMirror{font-family:'JetBrains Mono',monospace!important;font-size:0.85rem!important;line-height:1.6!important;}
-    .challenge-check-row{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
-    .btn-check-ch{padding:0.55rem 1.4rem;background:var(--orange);color:#fff;border:none;border-radius:7px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;}
-    .btn-check-ch:hover:not(:disabled){background:var(--orange-dark);}
-    .btn-check-ch:disabled{opacity:0.5;cursor:not-allowed;}
-    .ch-feedback{margin-top:0.5rem;padding:0.7rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;display:none;}
-    .ch-feedback.show{display:block;}
-    .ch-feedback.success{background:var(--green-light);color:#065f46;border:1px solid #a7f3d0;}
-    .ch-feedback.error{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
-    .ch-hint{display:none;padding:0.75rem 1rem;background:var(--yellow-bg);border:1px solid #f59e0b;border-radius:8px;font-size:0.875rem;color:#78350f;line-height:1.6;}
-    .ch-hint.show{display:block;}
-    .attempts-badge{font-size:0.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:0.2rem 0.6rem;border-radius:99px;}
+    /* Line highlight for matched code */
+    .ch-line-pass{background:rgba(4,170,109,0.18)!important;}
+    /* Challenge instructions rich text */
+    .ch-instr-content{font-size:0.92rem;line-height:1.7;color:var(--text);margin-bottom:0.75rem;}
+    .ch-instr-content p{margin-bottom:0.4rem;}
+    .ch-instr-content p:empty{display:none;}
+    .ch-instr-content ul{padding-left:1.5rem;margin-bottom:0.5rem;}
+    .ch-instr-content ul li{list-style:disc;margin-bottom:0.2rem;}
+    .ch-instr-content ol{padding-left:1.5rem;margin-bottom:0.5rem;}
+    .ch-instr-content ol li{list-style:decimal;margin-bottom:0.2rem;}
+    .ch-instr-content strong{font-weight:700;}
+    .ch-instr-content em{font-style:italic;}
+    /* Checklist failed state */
+    .ch-check-item.failed{background:#fef2f2;border-color:#fca5a5;color:#991b1b;}
     .assignment-card{background:var(--card);border-radius:12px;border:2px solid #e9d5ff;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;}
     .assignment-card.pending{border-color:#fde68a;}
     .assignment-card.needs-revision{border-color:#fca5a5;}
@@ -169,6 +208,11 @@
     .btn-nav.primary{background:var(--green);color:#fff;border-color:var(--green);}
     .btn-nav.primary:hover:not(.locked-nav){background:var(--green-dark);}
     .btn-nav.locked-nav{opacity:0.45;cursor:not-allowed;}
+    .btn-complete{display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.6rem;border-radius:8px;border:none;background:var(--green);color:#fff;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;transition:background 0.15s,opacity 0.15s;}
+    .btn-complete:hover:not(:disabled){background:var(--green-dark);}
+    .btn-complete:disabled{opacity:0.45;cursor:not-allowed;background:var(--muted);}
+    .btn-complete.done{background:#0f766e;}
+    .complete-hint{font-size:0.75rem;color:var(--muted);margin-top:0.4rem;text-align:center;}
     .editor-overlay{position:fixed;inset:0;background:rgba(10,10,20,0.75);backdrop-filter:blur(3px);z-index:200;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.2s;}
     .editor-overlay.open{opacity:1;pointer-events:all;}
     .editor-topbar{background:#1e1e2e;padding:0.7rem 1.25rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid #333;}
@@ -234,13 +278,9 @@ let blockPassed={}, totalInteractive=0;
 let challengeEditors={}, challengeAttempts={};
 let selectedOptions={};
 let submissionIds={};
-let assignmentBlocks={};  // asI -> block data, avoids JSON-in-onclick
-let tryitBlocks={};       // tryit button index -> code string
-
-// ─── saved progress loaded from server before render ───
-// passedInteractiveIndices: Set of interactive-block indices already passed
+let assignmentBlocks={};
+let tryitBlocks={};
 let passedInteractiveIndices=new Set();
-// passedExerciseAnswers: map of exI -> correct option index (to highlight on restore)
 let passedExerciseAnswers={};
 
 async function init(){
@@ -254,21 +294,16 @@ async function init(){
     const lessonRes=await fetch('/api/lessons/'+lessonId);
     if(!lessonRes.ok){setMainContent('<p style="padding:2rem;color:#ef4444">Lesson not found.</p>');return;}
     lesson=await lessonRes.json();
-
-    // Fetch siblings, courses, progress and submissions all in parallel
     const[siblingsRes,coursesRes,progressRes,subsRes]=await Promise.all([
       fetch('/api/courses/'+lesson.course_id+'/lessons'),
       fetch('/api/courses'),
       fetch('/api/lessons/'+lessonId+'/progress').catch(()=>null),
       fetch('/api/lessons/'+lessonId+'/submissions').catch(()=>null)
     ]);
-
     allLessons=await siblingsRes.json();
     completedIds=new Set(allLessons.filter(l=>l.completed).map(l=>l.id));
     const courses=await coursesRes.json();
     const course=courses.find(c=>c.id===lesson.course_id);
-
-    // Load saved exercise/challenge progress
     if(progressRes?.ok){
       const progress=await progressRes.json();
       progress.forEach(p=>{
@@ -278,22 +313,12 @@ async function init(){
         }
       });
     }
-
-    // If lesson is already completed, treat ALL interactives as passed
     const isDone=completedIds.has(lesson.id);
-    if(isDone){
-      // We'll mark all blocks passed after render — flag handled in restoreState
-    }
-
-    // Load assignment submissions
     let existingSubs=[];
     if(subsRes?.ok) existingSubs=await subsRes.json();
-
     renderSidebar(course);
     renderTopProgress();
     renderLesson();
-
-    // Restore state after DOM is built
     restoreInteractiveState(isDone);
     existingSubs.forEach(sub=>{
       const asI=sub.assignment_index;
@@ -305,27 +330,20 @@ async function init(){
       submissionIds[asI]=sub.id;
       loadAssignmentState(asI,sub,block);
     });
-
   }catch(e){setMainContent('<p style="padding:2rem;color:#ef4444">Failed to load: '+e.message+'</p>');}
 }
 
-// ─── Restore exercise + challenge state from saved progress ───
 function restoreInteractiveState(lessonAlreadyDone){
   let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
   const blocks=content.blocks||[];
-  const letters=['A','B','C','D','E','F'];
   let exI=0,chI=0,asI=0,iI=0;
-
   for(const b of blocks){
     if(['exercise','challenge','assignment'].includes(b.type)){
       const alreadyPassed=lessonAlreadyDone||passedInteractiveIndices.has(iI);
-
       if(alreadyPassed && b.type==='exercise'){
-        // Mark card green
         document.getElementById('exercise-'+exI)?.classList.add('passed');
         const numEl=document.querySelector('#exercise-'+exI+' .exercise-number');
         if(numEl)numEl.style.color='var(--green)';
-        // Show correct option highlighted (if we know which one), else just disable all
         const savedAnswerIdx=passedExerciseAnswers[exI];
         (b.options||[]).forEach((_,i)=>{
           const btn=document.getElementById('opt-'+exI+'-'+i);
@@ -333,19 +351,14 @@ function restoreInteractiveState(lessonAlreadyDone){
           btn.disabled=true;
           if(savedAnswerIdx!=null && i===savedAnswerIdx) btn.classList.add('correct');
         });
-        // Update check button
         const checkBtn=document.getElementById('ex-check-'+exI);
         if(checkBtn){checkBtn.textContent='✓ Passed';checkBtn.style.background='var(--green)';checkBtn.disabled=true;}
-        // Show success feedback
         const fb=document.getElementById('ex-fb-'+exI);
         if(fb){fb.textContent='✅ Correct! Well done.';fb.className='exercise-feedback show success';}
-        // Remove hint button
         document.getElementById('ex-hint-btn-'+exI)?.remove();
-        // Mark passed in state (silent — don't trigger autoComplete again)
         blockPassed[iI]=true;
         updateProgressDot(iI,true);
       }
-
       if(alreadyPassed && b.type==='challenge'){
         document.getElementById('challenge-'+chI)?.classList.add('passed');
         const hdr=document.querySelector('#challenge-'+chI+' .challenge-header');
@@ -360,27 +373,19 @@ function restoreInteractiveState(lessonAlreadyDone){
         blockPassed[iI]=true;
         updateProgressDot(iI,true);
       }
-
-      // assignment passed state is handled by loadAssignmentState
-      // but if lessonAlreadyDone and no submission record, still mark passed so Next unlocks
       if(alreadyPassed && b.type==='assignment'){
         blockPassed[iI]=true;
         updateProgressDot(iI,true);
       }
-
       if(b.type==='exercise')exI++;
       if(b.type==='challenge')chI++;
       if(b.type==='assignment')asI++;
       iI++;
     }
   }
-
-  // Update progress count label
   const passedCount=Object.values(blockPassed).filter(Boolean).length;
   const countEl=document.getElementById('bp-count');
   if(countEl)countEl.textContent=passedCount+'/'+totalInteractive;
-
-  // If all done, unlock Next immediately
   if(totalInteractive>0 && Object.values(blockPassed).every(Boolean)){
     unlockNextBtn();
   } else if(lessonAlreadyDone && totalInteractive===0){
@@ -388,7 +393,6 @@ function restoreInteractiveState(lessonAlreadyDone){
   }
 }
 
-// Update a single progress dot without triggering side effects
 function updateProgressDot(iI,passed){
   const dot=document.getElementById('bp-dot-'+iI);
   if(dot&&passed)dot.classList.add('passed');
@@ -430,7 +434,6 @@ function renderLesson(){
   const isDone=completedIds.has(lesson.id);
   const interactiveBlocks=blocks.filter(b=>['exercise','challenge','assignment'].includes(b.type));
   totalInteractive=interactiveBlocks.length;
-  // Initialise all as false — restoreInteractiveState will set the true ones
   interactiveBlocks.forEach((_,i)=>{blockPassed[i]=false;});
 
   let html='<div class="lesson-meta">Module '+(lesson.module_number||1)+' › Lesson '+lesson.order_num+'</div>';
@@ -449,11 +452,29 @@ function renderLesson(){
   assignmentBlocks={};
   let exI=0,chI=0,asI=0,iI=0;
   for(const b of blocks){
+
+    // ── THEORY: render rich HTML directly (no arrow bullets) ──
     if(b.type==='theory'){
-      const lines=(b.content||'').split('\n').filter(l=>l.trim());
       if(b.label)html+=`<h2 class="section-heading">${esc(b.label)}</h2>`;
-      html+=`<ul class="theory-list">${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`;
+      const rawContent = b.content || '';
+      // Detect if content is already HTML (from Quill) or plain text (legacy)
+      const isHTML = /<[a-z][\s\S]*>/i.test(rawContent);
+      let theoryHTML = '';
+      if(isHTML){
+        // New Quill content — render as-is
+        theoryHTML = rawContent;
+      } else {
+        // Legacy plain text — convert each non-empty line to a <p>
+        theoryHTML = rawContent
+          .split('\n')
+          .map(l => l.trim())
+          .filter(l => l.length > 0)
+          .map(l => `<p>${escHtml(l)}</p>`)
+          .join('');
+      }
+      html+=`<div class="theory-content">${theoryHTML}</div>`;
     }
+
     if(b.type==='code'){
       html+=`<div class="code-block-wrap">`;
       if(b.label)html+=`<div class="code-block-label">${esc(b.label)}</div>`;
@@ -476,24 +497,50 @@ function renderLesson(){
     if(b.type==='assignment'){html+=buildAssignmentHTML(b,asI,iI);asI++;iI++;}
   }
 
-  // Next button: locked only if there are unfinished interactives
   const allBlocksDone=totalInteractive===0||Object.values(blockPassed).every(Boolean)||isDone;
   const nextLocked=!allBlocksDone;
+  // Complete Lesson button logic:
+  // - No activities → always enabled
+  // - Has activities → locked until all passed
+  const hasActivities=totalInteractive>0;
+  const completeLocked=hasActivities&&!allBlocksDone;
+  const alreadyDone=completedIds.has(lesson.id);
+
   html+=`<div class="lesson-nav">`;
   html+=prev?`<a class="btn-nav" href="lesson.html?id=${prev.id}">← ${esc(prev.title)}</a>`:`<span></span>`;
-  if(next)html+=`<button class="btn-nav primary ${nextLocked?'locked-nav':''}" id="nextBtn" title="${nextLocked?'Complete all activities to unlock':''}">${esc(next.title)} →</button>`;
-  else html+=`<span style="color:var(--green);font-weight:600">🎉 You finished the course!</span>`;
+
+  // Right side: Complete button + optional Next
+  html+=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">`;
+  if(next){
+    // Show Complete + Next together
+    html+=`<div style="display:flex;gap:0.65rem;align-items:center">`;
+    html+=`<button class="btn-complete${alreadyDone?' done':''}" id="completeBtn" ${completeLocked?'disabled':''} onclick="handleCompleteLesson()">${alreadyDone?'✅ Completed':'✔ Complete Lesson'}</button>`;
+    html+=`<button class="btn-nav primary ${nextLocked?'locked-nav':''}" id="nextBtn" title="${nextLocked?'Complete all activities to unlock':''}">${esc(next.title)} →</button>`;
+    html+=`</div>`;
+  } else {
+    // Last lesson — only Complete button
+    html+=`<button class="btn-complete${alreadyDone?' done':''}" id="completeBtn" ${completeLocked?'disabled':''} onclick="handleCompleteLesson()">${alreadyDone?'✅ Completed':'✔ Complete Lesson'}</button>`;
+  }
+  if(completeLocked){
+    html+=`<span class="complete-hint">⚡ Complete all activities to unlock</span>`;
+  }
+  html+=`</div>`;
   html+=`</div>`;
 
   setMainContent(html);
   document.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
-  // Wire up Next button if already unlocked
   if(!nextLocked)unlockNextBtn();
+  // If no activities, complete button is always enabled — wire it up immediately
+  if(totalInteractive===0){
+    const cBtn=document.getElementById('completeBtn');
+    if(cBtn&&!alreadyDone){
+      cBtn.disabled=false;
+    }
+  }
   let chIdx2=0;
-  blocks.forEach(b=>{if(b.type==='challenge'){const i2=chIdx2;setTimeout(()=>initChallengeEditor(i2,b),100+i2*60);chIdx2++;}});
+  blocks.forEach(b=>{if(b.type==='challenge'){const i2=chIdx2;setTimeout(()=>initChallengeEditor(i2,b),80+i2*60);chIdx2++;}});
 }
 
-/* ── Exercise ── */
 function buildExerciseHTML(b,exI,iI){
   const letters=['A','B','C','D','E','F'];
   const opts=(b.options||[]).map((o,i)=>`<button class="option-btn" id="opt-${exI}-${i}" onclick="selectOption(${exI},${i})"><div class="option-letter">${letters[i]}</div><span>${esc(o.text)}</span></button>`).join('');
@@ -525,7 +572,6 @@ async function checkAnswer(exI,iI){
 }
 function showExHint(exI){document.getElementById('ex-hint-box-'+exI)?.classList.add('show');document.getElementById('ex-hint-btn-'+exI)?.remove();}
 
-// Helper: get interactive index for a given exercise index
 function getIIforEx(exI){
   let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
   const blocks=content.blocks||[];let iI=0,eI=0;
@@ -533,80 +579,377 @@ function getIIforEx(exI){
   return iI;
 }
 
-/* ── Challenge ── */
+// Store challenge meta safely — avoids JSON injection in onclick attrs
+let challengeMeta={};
+
+function buildInstrHtml(text){
+  if(!text)return'';
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  let html='';
+  for(const line of lines){
+    const numbered=/^(\d+)[\.\)\:]\s+(.+)$/.exec(line);
+    if(numbered){
+      html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">`
+        +`<span style="min-width:26px;width:26px;height:26px;border-radius:50%;background:#f97316;color:#fff;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${numbered[1]}</span>`
+        +`<span style="font-size:0.9rem;color:#1e293b;line-height:1.5;">${escHtml(numbered[2])}</span>`
+        +`</div>`;
+    } else {
+      html+=`<div style="font-size:0.9rem;line-height:1.6;margin-bottom:6px;color:#1e293b;">${escHtml(line)}</div>`;
+    }
+  }
+  return html;
+}
+
 function buildChallengeHTML(b,chI,iI){
   challengeAttempts[chI]=0;
-  const num=totalInteractive>1?`🏆 Code Challenge ${iI+1}`:'🏆 Code Challenge';
+  challengeMeta[chI]={
+    expectedOutput : b.expectedOutput||'',
+    matchMode      : b.matchMode||'contains',
+    iI,
+    starter        : b.starterCode||'',
+    solution       : b.solutionCode||'',
+    hint           : b.hint||'',
+    requirements   : b.requirements||[]
+  };
 
-  // Auto-split instructions: handles both newline-separated AND inline "1. ... 2. ..." format
-  function splitInstructions(text){
-    if(!text)return[];
-    // First try splitting by newlines
-    const byLine=text.split('\n').map(l=>l.trim()).filter(Boolean);
-    // If there are numbered steps inline (e.g. "some intro 1. step one 2. step two")
-    // split on the numbered pattern regardless
-    const result=[];
-    for(const line of byLine){
-      // Check if this line contains inline numbered steps like "... 1. Add ... 2. Set ..."
-      if(/\d+\. /.test(line)){
-        // Split on digit+dot+space pattern, keeping the delimiter
-        const parts=line.split(/(?=\d+\. )/);
-        for(const part of parts){
-          const trimmed=part.trim();
-          if(trimmed)result.push(trimmed);
-        }
-      } else {
-        result.push(line);
-      }
-    }
-    return result;
-  }
+  const num = totalInteractive>1 ? `🏆 Code Challenge ${iI+1}` : '🏆 Code Challenge';
+  const starter = escHtml(b.starterCode||'<!-- Build your HTML page here -->');
 
-  const lines=splitInstructions(b.instructions);
-  const instrHtml=lines.map(l=>{
-    if(/^\d+\. /.test(l))return`<div class="ch-step"><span class="ch-step-num">${l.match(/^(\d+)/)[1]}</span><span class="ch-step-text">${escHtml(l.replace(/^\d+\. /,''))}</span></div>`;
-    return`<div class="challenge-instructions">${escHtml(l)}</div>`;
-  }).join('');
+  // Instructions: rich HTML from Quill — render as-is
+  const instrHtml = b.instructions
+    ? `<div class="ch-instr-content">${b.instructions}</div>`
+    : '';
 
-  return`<div class="challenge-card" id="challenge-${chI}"><div class="challenge-header"><div class="challenge-badge">${num}</div><div class="challenge-title">${esc(b.label||'Code Challenge')}</div></div><div class="challenge-body">${instrHtml}<div class="challenge-editor-wrap"><div class="challenge-editor-header"><span class="challenge-editor-label">HTML Editor</span><button class="btn-reset-ch" onclick="resetChallenge(${chI})">↺ Reset</button><button class="btn-run-ch" onclick="runChallenge(${chI})">▶ Run</button></div><div class="challenge-split"><div class="ch-code-pane" id="ch-code-${chI}"><textarea id="ch-ta-${chI}">${escHtml(b.starterCode||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div><div class="ch-preview-pane"><iframe id="ch-iframe-${chI}"></iframe></div></div></div><div class="challenge-check-row"><button class="btn-check-ch" id="ch-check-${chI}" onclick="checkChallenge(${chI},${iI},${JSON.stringify(b.expectedOutput||'')},${JSON.stringify(b.matchMode||'contains')})">✓ Check My Output</button>${b.hint?`<button class="btn-hint" id="ch-hint-btn-${chI}" onclick="showChallengeHint(${chI})" style="display:none">💡 Hint</button>`:''}<span class="attempts-badge" id="ch-att-${chI}">0 attempts</span></div><div class="ch-feedback" id="ch-fb-${chI}"></div>${b.hint?`<div class="ch-hint" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>`:''}</div></div>`;
+  // Checklist — only from teacher-defined requirements
+  const reqs = b.requirements||[];
+  const checklistHtml = reqs.length > 0
+    ? `<div class="ch-checklist">
+        <div class="ch-checklist-title">Checklist</div>
+        ${reqs.map((r,ri)=>`
+          <div class="ch-check-item" id="ch-ci-${chI}-${ri}">
+            <div class="ch-check-box" id="ch-cb-${chI}-${ri}"></div>
+            <span>${escHtml(r)}</span>
+          </div>`).join('')}
+      </div>`
+    : '';
+
+  return `<div class="challenge-card" id="challenge-${chI}">
+    <div class="ch-top">
+      <div class="ch-badge-row"><span class="ch-badge" id="ch-badge-${chI}">${num}</span></div>
+      <div class="ch-main-title">${esc(b.label||'Code Challenge')}</div>
+      ${instrHtml}
+    </div>
+    <div class="ch-split-wrap">
+      <div class="ch-editor-side">
+        <div class="ch-editor-tabs">
+          <button class="ch-tab active" id="ch-tab-code-${chI}" onclick="switchChTab(${chI},'code')">Code</button>
+          <button class="ch-tab" id="ch-tab-sol-${chI}" onclick="switchChTab(${chI},'solution')">Solution</button>
+          <button class="ch-check-btn" id="ch-check-${chI}" onclick="checkChallenge(${chI})">Check Code</button>
+        </div>
+        <div class="ch-code-area" id="ch-code-area-${chI}">
+          <textarea id="ch-ta-${chI}">${starter}</textarea>
+        </div>
+        <div class="ch-solution-area" id="ch-sol-${chI}"></div>
+      </div>
+      <div class="ch-result-side">
+        <div class="ch-result-header">
+          <div class="ch-mac-dots">
+            <div class="ch-dot red"></div>
+            <div class="ch-dot yellow"></div>
+            <div class="ch-dot green"></div>
+          </div>
+          <span class="ch-result-label">Result</span>
+        </div>
+        <div class="ch-result-placeholder" id="ch-placeholder-${chI}">Click <strong style="color:#10b981;">Check Code</strong> to see the result here.</div>
+        <iframe class="ch-result-frame" id="ch-iframe-${chI}" style="display:none;"></iframe>
+      </div>
+    </div>
+    <div class="ch-feedback-bar" id="ch-fb-${chI}"></div>
+    ${b.hint ? `<div class="ch-hint-bar" id="ch-hint-${chI}"><strong>💡 Hint:</strong> ${esc(b.hint)}</div>` : ''}
+    ${checklistHtml}
+  </div>`;
 }
 function initChallengeEditor(chI,block){
-  const ta=document.getElementById('ch-ta-'+chI);if(!ta||challengeEditors[chI])return;
-  challengeEditors[chI]={cm:CodeMirror.fromTextArea(ta,{mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2}),starter:block.starterCode||''};
-  challengeEditors[chI].cm.getWrapperElement().style.minHeight='200px';
-  setTimeout(()=>runChallenge(chI),200);
+  const ta=document.getElementById('ch-ta-'+chI);
+  if(!ta||challengeEditors[chI])return;
+  const cm=CodeMirror.fromTextArea(ta,{
+    mode:'htmlmixed',theme:'dracula',lineNumbers:true,lineWrapping:true,indentUnit:2,tabSize:2
+  });
+  cm.getWrapperElement().style.minHeight='220px';
+  cm.getWrapperElement().style.height='220px';
+  challengeEditors[chI]={cm, starter:block.starterCode||'<!-- Build your HTML page here -->'};
+
+  // If already passed on load, lock immediately after editor initializes
+  const meta = challengeMeta[chI]||{};
+  const iI   = meta.iI ?? chI;
+  if(blockPassed[iI]) lockChallengeEditor(chI);
 }
-function runChallenge(chI){const e=challengeEditors[chI];const code=e?e.cm.getValue():(document.getElementById('ch-ta-'+chI)?.value||'');const frame=document.getElementById('ch-iframe-'+chI);if(!frame)return;const doc=frame.contentDocument||frame.contentWindow.document;doc.open();doc.write(code);doc.close();}
-function resetChallenge(chI){const e=challengeEditors[chI];if(e){e.cm.setValue(e.starter);runChallenge(chI);}}
-async function checkChallenge(chI,iI,expectedOutput,matchMode){
-  if(blockPassed[iI])return;
-  runChallenge(chI);await new Promise(r=>setTimeout(r,300));
-  const frame=document.getElementById('ch-iframe-'+chI);const fd=frame?.contentDocument||frame?.contentWindow?.document;if(!fd)return;
-  const rendered=(fd.body?.innerText||'').trim().toLowerCase();
-  const expected=(expectedOutput||'').trim().toLowerCase();
-  const passed=matchMode==='exact'?rendered===expected:rendered.includes(expected)||(fd.body?.innerHTML||'').toLowerCase().includes(expected);
-  challengeAttempts[chI]=(challengeAttempts[chI]||0)+1;
-  const attEl=document.getElementById('ch-att-'+chI);if(attEl)attEl.textContent=challengeAttempts[chI]+' attempt'+(challengeAttempts[chI]!==1?'s':'');
-  try{await fetch('/api/exercises/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lesson_id:lesson.id,exercise_index:chI,interactive_index:iI,answer_index:0,passed})});}catch(_){}
-  const fb=document.getElementById('ch-fb-'+chI);
-  if(passed){
-    fb.textContent='✅ Correct! Your output matches.';fb.className='ch-feedback show success';
-    document.getElementById('challenge-'+chI)?.classList.add('passed');
-    const btn=document.getElementById('ch-check-'+chI);btn.textContent='✓ Passed';btn.style.background='var(--green)';btn.disabled=true;
-    document.getElementById('ch-hint-btn-'+chI)?.remove();
-    onBlockPassed(iI);
-  }else{
-    const display=(fd.body?.innerText||'').trim().substring(0,80);
-    fb.innerHTML='❌ Not quite. Your page shows: <em>"'+esc(display)+(display.length>=80?'…':'')+'"</em><br>Expected to '+(matchMode==='exact'?'exactly match':'contain')+': <strong>"'+esc(expectedOutput)+'"</strong>';
-    fb.className='ch-feedback show error';
-    if(challengeAttempts[chI]>=1){const hb=document.getElementById('ch-hint-btn-'+chI);if(hb)hb.style.display='';}
+
+function lockChallengeEditor(chI){
+  const e = challengeEditors[chI];
+  if(e){
+    e.cm.setOption('readOnly','nocursor');
+    e.cm.getWrapperElement().style.opacity='0.75';
+  }
+  const btn = document.getElementById('ch-check-'+chI);
+  if(btn){ btn.textContent='✓ Passed'; btn.classList.add('passed-btn'); btn.disabled=true; }
+  document.getElementById('challenge-'+chI)?.classList.add('passed');
+  const badge = document.getElementById('ch-badge-'+chI);
+  if(badge) badge.classList.add('passed-badge');
+  const fb = document.getElementById('ch-fb-'+chI);
+  if(fb){ fb.textContent='🎉 You already passed this challenge!'; fb.className='ch-feedback-bar show success'; }
+  const hintBar = document.getElementById('ch-hint-'+chI);
+  if(hintBar) hintBar.classList.remove('show');
+
+  // ── Check all checklist items as passed ──
+  const meta = challengeMeta[chI]||{};
+  const reqs = meta.requirements||[];
+  reqs.forEach((_,ri)=>{
+    const item = document.getElementById('ch-ci-'+chI+'-'+ri);
+    const box  = document.getElementById('ch-cb-'+chI+'-'+ri);
+    if(item){ item.classList.add('checked'); item.classList.remove('failed'); }
+    if(box){ box.textContent='✓'; box.style.background=''; box.style.borderColor=''; box.style.color=''; }
+  });
+}
+
+function switchChTab(chI, tab){
+  const codeArea = document.getElementById('ch-code-area-'+chI);
+  const solArea  = document.getElementById('ch-sol-'+chI);
+  const codeTab  = document.getElementById('ch-tab-code-'+chI);
+  const solTab   = document.getElementById('ch-tab-sol-'+chI);
+  const meta     = challengeMeta[chI]||{};
+
+  if(tab==='code'){
+    if(codeArea) codeArea.style.display='';
+    if(solArea)  solArea.style.display='none';
+    codeTab?.classList.add('active');
+    solTab?.classList.remove('active');
+  } else {
+    // Solution tab — render with CodeMirror for syntax highlighting + line breaks
+    if(codeArea) codeArea.style.display='none';
+    if(solArea){
+      solArea.style.display='block';
+      // If not yet initialized, create a read-only CodeMirror instance
+      if(!solArea.dataset.init){
+        solArea.dataset.init='1';
+        const ta=document.createElement('textarea');
+        ta.value=meta.solution||'<!-- No solution provided -->';
+        solArea.appendChild(ta);
+        const cm=CodeMirror.fromTextArea(ta,{
+          mode:'htmlmixed',theme:'dracula',lineNumbers:true,
+          lineWrapping:true,readOnly:true,indentUnit:2,tabSize:2
+        });
+        cm.getWrapperElement().style.minHeight='220px';
+        cm.getWrapperElement().style.height='220px';
+        setTimeout(()=>cm.refresh(),50);
+      }
+    }
+    codeTab?.classList.remove('active');
+    solTab?.classList.add('active');
   }
 }
-function showChallengeHint(chI){document.getElementById('ch-hint-'+chI)?.classList.add('show');document.getElementById('ch-hint-btn-'+chI)?.remove();}
 
-/* ── Assignment ── */
+function runChallengeInFrame(chI, code){
+  const frame       = document.getElementById('ch-iframe-'+chI);
+  const placeholder = document.getElementById('ch-placeholder-'+chI);
+  if(!frame) return;
+  if(placeholder) placeholder.style.display='none';
+  frame.style.display='block';
+  const doc=frame.contentDocument||frame.contentWindow.document;
+  doc.open(); doc.write(code); doc.close();
+}
+
+function highlightMatchedLines(chI, code, reqs){
+  const e = challengeEditors[chI];
+  if(!e) return;
+  const cm = e.cm;
+  // Clear existing highlights
+  cm.getAllMarks().forEach(m=>m.clear());
+  const lines = code.split('\n');
+  lines.forEach((line,i)=>{
+    const lineLower = line.toLowerCase();
+    // Highlight line green if it contains any req keyword or is meaningful code
+    const isCode = line.trim() && !line.trim().startsWith('<!--');
+    const matchesReq = reqs.some(r=>{
+      const keywords = r.toLowerCase().replace(/<[^>]+>/g,'').split(/\s+/).filter(w=>w.length>2);
+      return keywords.some(k=>lineLower.includes(k));
+    });
+    if(isCode || matchesReq){
+      cm.addLineClass(i,'background','ch-line-pass');
+    }
+  });
+}
+
+
+async function checkChallenge(chI){
+  const meta           = challengeMeta[chI]||{};
+  const iI             = meta.iI ?? chI;
+  const expectedOutput = meta.expectedOutput||'';
+  const matchMode      = meta.matchMode||'contains';
+  const reqs           = meta.requirements||[];
+  const starter        = meta.starter||'<!-- Build your HTML page here -->';
+
+  if(blockPassed[iI]) return;
+
+  const e    = challengeEditors[chI];
+  const code = e ? e.cm.getValue() : (document.getElementById('ch-ta-'+chI)?.value||'');
+  const fb   = document.getElementById('ch-fb-'+chI);
+
+  // ── Empty / unchanged ──
+  const trimmed = code.trim();
+  if(!trimmed || trimmed === starter.trim() || trimmed === '<!-- Build your HTML page here -->'){
+    fb.textContent = 'The editor has not been used yet. Replace the comment with real code.';
+    fb.className   = 'ch-feedback-bar show warning';
+    runChallengeInFrame(chI,
+      `<body style="font-family:monospace;color:#ef4444;padding:1rem;font-size:0.85rem;">
+        No changes have been made. Edit the code and try again.
+      </body>`
+    );
+    return;
+  }
+
+  // ── Run code in result pane ──
+  runChallengeInFrame(chI, code);
+  await new Promise(r=>setTimeout(r,350));
+
+  const frame = document.getElementById('ch-iframe-'+chI);
+  const fd    = frame?.contentDocument || frame?.contentWindow?.document;
+  if(!fd) return;
+
+  const renderedText = (fd.body?.innerText||'').trim().toLowerCase();
+  const renderedHTML = (fd.body?.innerHTML||'').toLowerCase();
+  const codeLC       = code.toLowerCase();
+  const expected     = expectedOutput.trim().toLowerCase();
+
+  // ── Check each requirement against student's raw code ──
+  // Strategy: extract what the teacher wrote as the req text,
+  // strip HTML tags to get the plain keywords, then check if those
+  // tags/keywords appear literally in the student's code.
+  let passedCount = 0;
+
+  // Helper: extract HTML tags mentioned in requirement e.g. <!DOCTYPE html>, <h1>, </body>
+  function extractTagsFromReq(req){
+    // Match things like <!DOCTYPE html>, <html>, <h1>, </body>, etc.
+    const tags=[];
+    const tagRe=/<!?[a-zA-Z][^>]*>|<\/[a-zA-Z]+>/g;
+    let m;
+    // Also check the raw req (it may have &lt; &gt; encoded)
+    const decoded=req.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+    while((m=tagRe.exec(decoded))!==null) tags.push(m[0].toLowerCase());
+    return tags;
+  }
+
+  // Helper: extract plain text keywords (non-tag words) from requirement
+  function extractKeywords(req){
+    const decoded=req.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+    // Remove HTML tags, keep meaningful words
+    return decoded.replace(/<[^>]+>/g,' ')
+      .split(/\s+/)
+      .map(w=>w.toLowerCase().replace(/[^a-z0-9]/g,''))
+      .filter(w=>w.length>3);
+  }
+
+  reqs.forEach((r,ri)=>{
+    const tags     = extractTagsFromReq(r);
+    const keywords = extractKeywords(r);
+    let reqPassed  = false;
+
+    if(tags.length > 0){
+      // If requirement mentions specific HTML tags, check those tags exist in code
+      reqPassed = tags.every(tag => codeLC.includes(tag));
+    } else if(keywords.length > 0){
+      // Otherwise check keywords against rendered output
+      reqPassed = keywords.every(kw => renderedText.includes(kw) || codeLC.includes(kw));
+    } else {
+      reqPassed = true; // empty req always passes
+    }
+
+    const item = document.getElementById('ch-ci-'+chI+'-'+ri);
+    const box  = document.getElementById('ch-cb-'+chI+'-'+ri);
+    if(item && box){
+      if(reqPassed){
+        item.classList.add('checked');
+        item.classList.remove('failed');
+        box.textContent       = '✓';
+        box.style.background  = '';
+        box.style.borderColor = '';
+        box.style.color       = '';
+        passedCount++;
+      } else {
+        item.classList.remove('checked');
+        item.classList.add('failed');
+        box.textContent       = '✕';
+        box.style.background  = '#fee2e2';
+        box.style.borderColor = '#fca5a5';
+        box.style.color       = '#991b1b';
+      }
+    }
+  });
+
+  // ── Main pass/fail ──
+  const passed = reqs.length > 0
+    ? passedCount === reqs.length
+    : (matchMode==='exact' ? renderedText===expected : renderedText.includes(expected)||renderedHTML.includes(expected));
+
+  challengeAttempts[chI] = (challengeAttempts[chI]||0) + 1;
+
+  // Highlight matched lines in editor
+  highlightMatchedLines(chI, code, reqs);
+
+  // Save to server
+  try{
+    await fetch('/api/exercises/check',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lesson_id:lesson.id, exercise_index:chI, interactive_index:iI, answer_index:0, passed})
+    });
+  }catch(_){}
+
+  if(passed){
+    // All checklist items green
+    reqs.forEach((_,ri)=>{
+      const item = document.getElementById('ch-ci-'+chI+'-'+ri);
+      const box  = document.getElementById('ch-cb-'+chI+'-'+ri);
+      if(item){ item.classList.add('checked'); item.classList.remove('failed'); }
+      if(box) { box.textContent='✓'; box.style.background=''; box.style.borderColor=''; box.style.color=''; }
+    });
+
+    fb.innerHTML  = '🎉 Great job! You nailed it!';
+    fb.className  = 'ch-feedback-bar show success';
+
+    document.getElementById('challenge-'+chI)?.classList.add('passed');
+    const btn = document.getElementById('ch-check-'+chI);
+    if(btn){ btn.textContent='✓ Passed'; btn.classList.add('passed-btn'); btn.disabled=true; }
+    const badge = document.getElementById('ch-badge-'+chI);
+    if(badge) badge.classList.add('passed-badge');
+
+    const hintBar = document.getElementById('ch-hint-'+chI);
+    if(hintBar) hintBar.classList.remove('show');
+
+    onBlockPassed(iI);
+    lockChallengeEditor(chI);
+  } else {
+    const allFailed = passedCount === 0;
+    if(reqs.length > 0 && !allFailed){
+      fb.textContent = 'Almost there! Fix the missing checklist items.';
+      fb.className   = 'ch-feedback-bar show warning';
+    } else {
+      fb.textContent = 'Not quite — check your code and try again.';
+      fb.className   = 'ch-feedback-bar show error';
+    }
+
+    // Show teacher hint after first fail
+    if(challengeAttempts[chI] >= 1 && meta.hint){
+      const hintBar = document.getElementById('ch-hint-'+chI);
+      if(hintBar) hintBar.classList.add('show');
+    }
+  }
+}
+function showChallengeHint(chI){
+  document.getElementById('ch-hint-'+chI)?.classList.add('show');
+}
+
 function buildAssignmentHTML(b,asI,iI){
-  assignmentBlocks[asI]=b;  // store for submitAssignment to look up safely
+  assignmentBlocks[asI]=b;
   const num=totalInteractive>1?`📋 Assignment ${iI+1}`:'📋 Assignment';
   const reqs=(b.requirements||[]).map((r,ri)=>`<div class="req-item"><div class="req-box" id="asgn-req-${asI}-${ri}"></div><span>${esc(r)}</span></div>`).join('');
   const isCode=(b.submissionType||'code')==='code';
@@ -704,7 +1047,6 @@ function setPendingState(asI,code){
   const fbEl=document.getElementById('asgn-feedback-'+asI);if(fbEl)fbEl.innerHTML='';
 }
 
-/* ── Block pass / complete ── */
 function onBlockPassed(iI,silent=false){
   if(blockPassed[iI])return;
   blockPassed[iI]=true;
@@ -718,14 +1060,34 @@ async function autoCompleteLesson(){
   try{await fetch('/api/lessons/'+lesson.id+'/complete',{method:'POST'});completedIds.add(lesson.id);renderSidebar(null);renderTopProgress();}catch(_){}
 }
 function unlockNextBtn(){
-  const btn=document.getElementById('nextBtn');if(!btn)return;
-  btn.classList.remove('locked-nav');btn.removeAttribute('title');
-  const idx=allLessons.findIndex(l=>l.id===lesson.id);
-  const nextLesson=allLessons[idx+1];
-  if(nextLesson)btn.onclick=()=>location.href='lesson.html?id='+nextLesson.id;
+  // Unlock Next button
+  const btn=document.getElementById('nextBtn');
+  if(btn){
+    btn.classList.remove('locked-nav');btn.removeAttribute('title');
+    const idx=allLessons.findIndex(l=>l.id===lesson.id);
+    const nextLesson=allLessons[idx+1];
+    if(nextLesson)btn.onclick=()=>location.href='lesson.html?id='+nextLesson.id;
+  }
+  // Unlock Complete button
+  const cBtn=document.getElementById('completeBtn');
+  if(cBtn){
+    cBtn.disabled=false;
+    const hintEl=document.querySelector('.complete-hint');
+    if(hintEl)hintEl.remove();
+  }
 }
 
-/* ── Try-it overlay ── */
+async function handleCompleteLesson(){
+  const cBtn=document.getElementById('completeBtn');
+  if(!cBtn||cBtn.disabled)return;
+  cBtn.disabled=true;
+  cBtn.textContent='Saving…';
+  await autoCompleteLesson();
+  cBtn.textContent='✅ Completed';
+  cBtn.classList.add('done');
+  cBtn.disabled=true;
+}
+
 function openTryIt(tIdx){
   const code=tryitBlocks[tIdx]||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>';
   tryItOriginalCode=code;
