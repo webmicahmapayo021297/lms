@@ -290,7 +290,7 @@ function addBlock(type,data={}){
   if(type==='challenge')setTimeout(()=>initChallengeCM(id,data),50);
   if(type==='challenge')setTimeout(()=>initChReqList(id,data.requirements||[]),60);
   if(type==='challenge')setTimeout(()=>initChQuill(id,data.instructions||''),80);
-  if(type==='exercise')initOptions(id,data.options||[]);
+  if(type==='exercise')setTimeout(()=>initExQuestions(id,data.questions||[]),50);
   if(type==='assignment')initReqList(id,data.requirements||[]);
   if(type==='theory')setTimeout(()=>initQuill(id,data.content||''),50);
 }
@@ -373,7 +373,20 @@ function buildBlockHTML(id,type,data){
   if(type==='code'){const lang=data.lang||'htmlmixed';return hdr+`<div class="block-body"><div class="code-lang-row"><label style="font-size:0.78rem;font-weight:600;color:var(--muted)">Language:</label><select class="lang-select" id="blang-${id}" onchange="updateCMLang(${id})"><option value="htmlmixed" ${lang==='htmlmixed'?'selected':''}>HTML</option><option value="javascript" ${lang==='javascript'?'selected':''}>JavaScript</option><option value="css" ${lang==='css'?'selected':''}>CSS</option><option value="text/plain" ${lang==='text/plain'?'selected':''}>Plain Text</option></select><label class="tryit-toggle"><span>Enable "Try it Yourself"</span><label class="toggle" style="margin-left:0.5rem"><input type="checkbox" id="btryit-${id}" ${data.tryit?'checked':''}/><span class="toggle-slider"></span></label></label></div><textarea id="bcm-${id}">${esc(data.code||'')}</textarea></div>`;}
   if(type==='note'){const nt=data.noteType||'tip';return hdr+`<div class="block-body"><div class="note-type-row"><button class="note-type-btn tip ${nt==='tip'?'active':''}" onclick="setNoteType(${id},'tip')">💡 Tip</button><button class="note-type-btn info ${nt==='info'?'active':''}" onclick="setNoteType(${id},'info')">ℹ Info</button><button class="note-type-btn warning ${nt==='warning'?'active':''}" onclick="setNoteType(${id},'warning')">⚠ Warning</button><input type="hidden" id="bnotetype-${id}" value="${nt}"/></div><textarea class="theory-ta" id="bc-${id}" placeholder="Note text…">${esc(data.content||'')}</textarea></div>`;}
   if(type==='tryit')return hdr+`<div class="block-body"><p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">Standalone "Try it Yourself" editor for students.</p><textarea class="theory-ta" id="bcm-${id}" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem" placeholder="Optional starter HTML…">${esc(data.code||'<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>')}</textarea></div>`;
-  if(type==='exercise')return hdr+`<div class="block-body"><div class="exercise-builder"><div class="form-field"><label class="ex-label">Question *</label><textarea class="ex-question-ta" id="exq-${id}" placeholder="e.g. What does HTML stand for?">${esc(data.question||'')}</textarea></div><div class="form-field"><label class="ex-label">Answer Options</label><div class="correct-hint">Click the <span>circle</span> next to the correct answer.</div><div class="options-list" id="opts-${id}"></div><button class="btn-add-option" onclick="addOption(${id})">＋ Add Option</button></div><div class="form-field"><label class="ex-label">💡 Hint (shown after wrong answer)</label><input class="ex-hint-input" id="exhint-${id}" type="text" placeholder="e.g. Think about what HT means…" value="${esc(data.hint||'')}"/></div></div></div>`;
+  if(type==='exercise'){
+    return hdr+`<div class="block-body"><div class="exercise-builder">
+      <div class="form-field" style="margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+          <label class="ex-label" style="margin:0;">Questions</label>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-add-option" style="margin:0;" onclick="addExQuestion(${id},'multiple_choice')">＋ Multiple Choice</button>
+            <button class="btn-add-option" style="margin:0;border-color:var(--primary);color:var(--primary);" onclick="addExQuestion(${id},'code_completion')">＋ Code Completion</button>
+          </div>
+        </div>
+        <div id="ex-questions-${id}" style="display:flex;flex-direction:column;gap:1rem;"></div>
+      </div>
+    </div></div>`;
+  }
   if(type==='challenge'){
     const mm=data.matchMode||'contains';
     return hdr+`<div class="block-body"><div class="challenge-builder">
@@ -465,6 +478,113 @@ function setNoteType(id,type){document.getElementById('bnotetype-'+id).value=typ
 function setMatchMode(id,mode){document.getElementById('chmm-'+id).value=mode;document.querySelectorAll('#block-'+id+' .match-btn').forEach(b=>{b.classList.remove('active');if(b.classList.contains(mode))b.classList.add('active');});}
 
 function initOptions(bId,existing){optionCounters[bId]=0;if(existing.length)existing.forEach(o=>addOption(bId,o));else{addOption(bId);addOption(bId);addOption(bId);}}
+
+// ── Multi-question exercise helpers ──
+let exQCounters={};   // blockId -> question count
+let exOptCounters={}; // blockId-qIdx -> option count
+let exCCAnsCounters={}; // blockId-qIdx -> cc answer count
+
+function initExQuestions(bId, existing){
+  exQCounters[bId]=0;
+  (existing||[]).forEach(q=>addExQuestion(bId, q.type||'multiple_choice', q));
+}
+
+function addExQuestion(bId, type, data={}){
+  const container=document.getElementById('ex-questions-'+bId);
+  if(!container)return;
+  const qIdx=++exQCounters[bId];
+  const qId=`eq-${bId}-${qIdx}`;
+  exOptCounters[qId]=0;
+  exCCAnsCounters[qId]=0;
+
+  const div=document.createElement('div');
+  div.id='ex-q-'+bId+'-'+qIdx;
+  div.dataset.qtype=type;  // store type as data attribute for reliable collection
+  div.style.cssText='background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;padding:1rem;position:relative;';
+
+  const isMC=type==='multiple_choice';
+  div.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:${isMC?'var(--primary)':'#4f46e5'};background:${isMC?'var(--primary-light)':'#ede9fe'};padding:0.2rem 0.6rem;border-radius:99px;">
+        Q${qIdx} · ${isMC?'Multiple Choice':'Code Completion'}
+      </span>
+      <button class="btn-remove" onclick="removeExQuestion('${bId}','${qIdx}')" style="width:auto;padding:0.2rem 0.5rem;border-radius:6px;">✕ Remove</button>
+    </div>
+    <div class="form-field" style="margin-bottom:0.75rem;">
+      <label class="ex-label">${isMC?'Question *':'Instructions *'}</label>
+      <textarea class="ex-question-ta" id="exq-${bId}-${qIdx}" placeholder="${isMC?'e.g. What does HTML stand for?':'e.g. Place the tags in the correct positions.'}" style="min-height:60px;">${esc(data.question||'')}</textarea>
+    </div>
+    ${isMC?`
+      <div class="form-field" style="margin-bottom:0.75rem;">
+        <label class="ex-label">Answer Options</label>
+        <div class="correct-hint">Click the <span>circle</span> next to the correct answer.</div>
+        <div class="options-list" id="opts-${bId}-${qIdx}"></div>
+        <button class="btn-add-option" onclick="addExOption('${bId}','${qIdx}')">＋ Add Option</button>
+      </div>
+    `:`
+      <div class="form-field" style="margin-bottom:0.75rem;">
+        <label class="ex-label">Code Template *</label>
+        <div class="ch-hint-text">Use <code style="background:#f1f5f9;padding:0.1em 0.3em;border-radius:3px;">[blank]</code> where students drag answers.</div>
+        <textarea class="theory-ta" id="excccode-${bId}-${qIdx}" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;min-height:100px;" placeholder="e.g. &lt;[blank]&gt;\n&lt;[blank]&gt;\n&lt;/[blank]&gt;">${esc(data.codeTemplate||'')}</textarea>
+      </div>
+      <div class="form-field" style="margin-bottom:0.75rem;">
+        <label class="ex-label">Answers (in order of blanks) *</label>
+        <div class="req-list" id="exccans-${bId}-${qIdx}" style="margin-top:0.4rem;"></div>
+        <button class="btn-add-option" onclick="addExCCAnswer('${bId}','${qIdx}')">＋ Add Answer</button>
+      </div>
+    `}
+    <div class="form-field">
+      <label class="ex-label">💡 Hint</label>
+      <input class="ex-hint-input" id="exhint-${bId}-${qIdx}" type="text" placeholder="Shown after wrong answer…" value="${esc(data.hint||'')}"/>
+    </div>`;
+
+  container.appendChild(div);
+
+  // Init options/answers from existing data
+  if(isMC){
+    (data.options||[{text:'',correct:false},{text:'',correct:false}]).forEach(o=>addExOption(bId,qIdx,o));
+    if(!(data.options||[]).length){addExOption(bId,qIdx);addExOption(bId,qIdx);}
+  } else {
+    (data.answers||[]).forEach(a=>addExCCAnswer(bId,qIdx,a));
+  }
+}
+
+function removeExQuestion(bId,qIdx){
+  document.getElementById('ex-q-'+bId+'-'+qIdx)?.remove();
+}
+
+function addExOption(bId,qIdx,data={}){
+  const list=document.getElementById('opts-'+bId+'-'+qIdx);if(!list)return;
+  const key=`eq-${bId}-${qIdx}`;
+  const idx=++exOptCounters[key];
+  const letters=['A','B','C','D','E','F'];
+  const letter=letters[idx-1]||String(idx);
+  const row=document.createElement('div');
+  row.className='option-row'+(data.correct?' is-correct':'');
+  row.id=`opt-${bId}-${qIdx}-${idx}`;
+  row.innerHTML=`<div class="opt-letter">${letter}</div>`
+    +`<input class="opt-text" type="text" id="opttext-${bId}-${qIdx}-${idx}" placeholder="Option ${letter}…" value="${esc(data.text||'')}"/>`
+    +`<input class="correct-radio" type="radio" name="correct-${bId}-${qIdx}" id="optcorrect-${bId}-${qIdx}-${idx}" value="${idx}" ${data.correct?'checked':''} onchange="markExCorrect('${bId}','${qIdx}',${idx})"/>`
+    +`<button class="btn-remove" onclick="removeRow('opt-${bId}-${qIdx}-${idx}')">✕</button>`;
+  list.appendChild(row);
+}
+
+function markExCorrect(bId,qIdx,cIdx){
+  document.querySelectorAll('#opts-'+bId+'-'+qIdx+' .option-row').forEach(r=>r.classList.remove('is-correct'));
+  document.getElementById('opt-'+bId+'-'+qIdx+'-'+cIdx)?.classList.add('is-correct');
+}
+
+function addExCCAnswer(bId,qIdx,text=''){
+  const list=document.getElementById('exccans-'+bId+'-'+qIdx);if(!list)return;
+  const key=`eq-${bId}-${qIdx}`;
+  const idx=++exCCAnsCounters[key];
+  const row=document.createElement('div');
+  row.className='req-row';row.id=`ccans-${bId}-${qIdx}-${idx}`;
+  row.innerHTML=`<div class="req-num" style="background:var(--primary-light);border-color:#c4b5fd;color:var(--primary);">${idx}</div>`
+    +`<input class="req-input" type="text" id="ccanstext-${bId}-${qIdx}-${idx}" placeholder="e.g. html" value="${esc(typeof text==='string'?text:'')}"/>`
+    +`<button class="btn-remove" onclick="removeRow('ccans-${bId}-${qIdx}-${idx}')">✕</button>`;
+  list.appendChild(row);
+}
 function addOption(bId,data={}){const list=document.getElementById('opts-'+bId);if(!list)return;const idx=++optionCounters[bId];const letter=LETTERS[idx-1]||String(idx);const row=document.createElement('div');row.className='option-row'+(data.correct?' is-correct':'');row.id='opt-'+bId+'-'+idx;row.innerHTML=`<div class="opt-letter">${letter}</div><input class="opt-text" type="text" id="opttext-${bId}-${idx}" placeholder="Option ${letter}…" value="${esc(data.text||'')}"/><input class="correct-radio" type="radio" name="correct-${bId}" id="optcorrect-${bId}-${idx}" value="${idx}" ${data.correct?'checked':''} onchange="markCorrect(${bId},${idx})"/><button class="btn-remove" onclick="removeRow('opt-${bId}-${idx}')">✕</button>`;list.appendChild(row);}
 function markCorrect(bId,cIdx){document.querySelectorAll('#opts-'+bId+' .option-row').forEach(r=>r.classList.remove('is-correct'));document.getElementById('opt-'+bId+'-'+cIdx)?.classList.add('is-correct');}
 
@@ -489,6 +609,7 @@ function deleteBlock(id){
   delete cmEditors['ch-'+id];
   delete quillEditors[id];
   delete chReqCounters[id];
+  delete exQCounters[id];
   delete quillEditors['ch-'+id];
   delete cmEditors['chsol-'+id];
   if(!blocks.length)document.getElementById('emptyMsg').style.display='';
@@ -507,7 +628,43 @@ function collectBlocks(){
     if(block.type==='code')return{...base,lang:document.getElementById('blang-'+id)?.value||'htmlmixed',code:cmEditors[id]?cmEditors[id].getValue():(document.getElementById('bcm-'+id)?.value||''),tryit:document.getElementById('btryit-'+id)?.checked||false};
     if(block.type==='note')return{...base,noteType:document.getElementById('bnotetype-'+id)?.value||'tip',content:document.getElementById('bc-'+id)?.value||''};
     if(block.type==='tryit')return{...base,code:document.getElementById('bcm-'+id)?.value||''};
-    if(block.type==='exercise'){const question=document.getElementById('exq-'+id)?.value?.trim()||'';const hint=document.getElementById('exhint-'+id)?.value?.trim()||'';const optList=document.getElementById('opts-'+id);const options=[];if(optList)optList.querySelectorAll('.option-row').forEach(row=>{const parts=row.id.split('-');const idx=parts[parts.length-1];const text=document.getElementById('opttext-'+id+'-'+idx)?.value?.trim()||'';const radio=document.getElementById('optcorrect-'+id+'-'+idx);if(text)options.push({text,correct:radio?.checked||false});});return{...base,question,hint,options};}
+    if(block.type==='exercise'){
+      // Collect all questions from the multi-question container
+      const qContainer=document.getElementById('ex-questions-'+id);
+      const questions=[];
+      if(qContainer){
+        qContainer.querySelectorAll('[id^="ex-q-'+id+'-"]').forEach(qDiv=>{
+          const parts=qDiv.id.split('-');
+          const qIdx=parts[parts.length-1];
+          // Read type from data attribute (reliable, no text parsing)
+          const qType=qDiv.dataset.qtype||'multiple_choice';
+          const question=document.getElementById('exq-'+id+'-'+qIdx)?.value?.trim()||'';
+          const hint=document.getElementById('exhint-'+id+'-'+qIdx)?.value?.trim()||'';
+          if(qType==='multiple_choice'){
+            const optList=document.getElementById('opts-'+id+'-'+qIdx);
+            const options=[];
+            if(optList)optList.querySelectorAll('.option-row').forEach(row=>{
+              const rparts=row.id.split('-');const oidx=rparts[rparts.length-1];
+              const text=document.getElementById('opttext-'+id+'-'+qIdx+'-'+oidx)?.value?.trim()||'';
+              const radio=document.getElementById('optcorrect-'+id+'-'+qIdx+'-'+oidx);
+              if(text)options.push({text,correct:radio?.checked||false});
+            });
+            questions.push({type:'multiple_choice',question,options,hint});
+          } else {
+            const codeTemplate=document.getElementById('excccode-'+id+'-'+qIdx)?.value||'';
+            const ansList=document.getElementById('exccans-'+id+'-'+qIdx);
+            const answers=[];
+            if(ansList)ansList.querySelectorAll('.req-row').forEach(row=>{
+              const rparts=row.id.split('-');const aidx=rparts[rparts.length-1];
+              const text=document.getElementById('ccanstext-'+id+'-'+qIdx+'-'+aidx)?.value?.trim()||'';
+              if(text)answers.push(text);
+            });
+            questions.push({type:'code_completion',question,codeTemplate,answers,hint});
+          }
+        });
+      }
+      return{...base,questions};
+    }
     if(block.type==='challenge'){
       const sc   = cmEditors['ch-'+id]    ? cmEditors['ch-'+id].getValue()    : (document.getElementById('chcmta-'+id)?.value||'');
       const sol  = cmEditors['chsol-'+id] ? cmEditors['chsol-'+id].getValue() : (document.getElementById('chsolcmta-'+id)?.value||'');
@@ -533,7 +690,15 @@ async function saveLesson(){
   if(!cId){toast('Please select a course','error');return;}
   const collected=collectBlocks();
   for(const b of collected){
-    if(b.type==='exercise'&&(!b.question||b.options.length<2||!b.options.some(o=>o.correct))){toast('An exercise is incomplete','error');return;}
+    if(b.type==='exercise'){
+      const qs=b.questions||[];
+      if(qs.length===0){toast('An exercise block has no questions','error');return;}
+      for(const q of qs){
+        if(!q.question){toast('An exercise question is missing text','error');return;}
+        if(q.type==='multiple_choice'&&(!(q.options||[]).some(o=>o.correct))){toast('A multiple choice question has no correct answer selected','error');return;}
+        if(q.type==='code_completion'&&(!(q.answers||[]).length)){toast('A code completion question has no answers','error');return;}
+      }
+    }
     if(b.type==='challenge'&&(!b.instructions||!b.expectedOutput)){toast('A challenge is incomplete','error');return;}
     if(b.type==='assignment'&&(!b.assignmentTitle||!b.instructions)){toast('An assignment is incomplete','error');return;}
   }
@@ -562,7 +727,26 @@ function buildPreview(){
     if(b.type==='code'){if(b.label)html+=`<div class="preview-code-label">${esc(b.label)}</div>`;html+=`<pre class="preview-code">${escHtml(b.code)}</pre>`;if(b.tryit)html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;}
     if(b.type==='note')html+=`<div class="preview-note ${b.noteType||'tip'}">${esc(b.content)}</div>`;
     if(b.type==='tryit')html+=`<div class="preview-try-btn">▶ Try it Yourself »</div>`;
-    if(b.type==='exercise'){const opts=(b.options||[]).map((o,i)=>`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`).join('');html+=`<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise</div><div class="preview-ex-q">${esc(b.question)}</div>${opts}${b.hint?`<div class="preview-hint">💡 ${esc(b.hint)}</div>`:''}</div>`;}
+    if(b.type==='exercise'){
+      const qs=b.questions||[];
+      let exHtml='<div class="preview-exercise"><div class="preview-ex-label">📝 Exercise ('+qs.length+' question'+(qs.length!==1?'s':'')+')</div>';
+      qs.forEach((q,qi)=>{
+        exHtml+=`<div style="margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border)">`;
+        exHtml+=`<div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:0.3rem;">Q${qi+1} · ${q.type==='code_completion'?'Code Completion':'Multiple Choice'}</div>`;
+        exHtml+=`<div class="preview-ex-q" style="margin-bottom:0.5rem;">${esc(q.question)}</div>`;
+        if(q.type==='multiple_choice'){
+          (q.options||[]).forEach((o,i)=>{
+            exHtml+=`<div class="preview-option"><div class="preview-opt-letter">${LETTERS[i]}</div>${esc(o.text)}${o.correct?'<span style="margin-left:auto;font-size:0.72rem;color:var(--success);font-weight:600">✓</span>':''}</div>`;
+          });
+        } else {
+          exHtml+=`<div style="font-size:0.78rem;color:var(--muted);">Answers: ${(q.answers||[]).map(a=>`<code style="background:#f1f5f9;padding:0.1em 0.3em;border-radius:3px;">${esc(a)}</code>`).join(', ')}</div>`;
+        }
+        if(q.hint)exHtml+=`<div class="preview-hint">💡 ${esc(q.hint)}</div>`;
+        exHtml+=`</div>`;
+      });
+      exHtml+='</div>';
+      html+=exHtml;
+    }
     if(b.type==='challenge'){
       const instrLines=(b.instructions||'').split('\n').filter(l=>l.trim()).map(l=>{
         const m=/^(\d+)[.): ]+(.+)$/.exec(l);

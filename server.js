@@ -398,25 +398,12 @@ app.post('/api/lessons/:id/uncomplete', requireAuth, async (req, res) => {
     const lessonId = parseInt(req.params.id);
     const lesson   = await get('SELECT course_id FROM lessons WHERE id = ?', [lessonId]);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
-
-    // Log to confirm this code is running
-    console.log('[UNDO] userId:', userId, 'lessonId:', lessonId);
-
-    // Delete exercise attempts first — check count before and after
-    const before = await get('SELECT COUNT(*) as cnt FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
-    console.log('[UNDO] exercise_attempts before:', before?.cnt);
-
     await run('DELETE FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
     await run('DELETE FROM submissions WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
     await run('DELETE FROM lesson_completions WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
-
-    const after = await get('SELECT COUNT(*) as cnt FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
-    console.log('[UNDO] exercise_attempts after:', after?.cnt);
-
     const progress = await recalcProgress(userId, lesson.course_id);
-    res.json({ success: true, progress, debug: { before: before?.cnt, after: after?.cnt } });
+    res.json({ success: true, progress });
   } catch (err) {
-    console.error('[UNDO] error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
