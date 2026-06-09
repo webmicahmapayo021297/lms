@@ -80,6 +80,12 @@
     .bp-dot.assignment{background:var(--purple-light);border:2px solid var(--purple);}
     .bp-dot.assignment.passed{background:var(--purple);}
     .exercise-card{background:var(--card);border-radius:12px;border:2px solid #fce7f3;padding:1.5rem;margin:2rem 0;transition:border-color 0.3s;}
+    .ex-progress-wrap{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;}
+    .ex-qdots{display:flex;gap:6px;}
+    .ex-qdot{width:28px;height:6px;border-radius:99px;background:var(--border);transition:background 0.3s;}
+    .ex-qdot.passed{background:var(--green);}
+    .ex-qcount{font-size:0.78rem;color:var(--muted);font-weight:500;}
+    .ex-question{font-size:1rem;font-weight:600;margin-bottom:1.1rem;line-height:1.5;}
     .exercise-card.passed{border-color:var(--green);}
     .exercise-number{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9d174d;margin-bottom:0.5rem;}
     .exercise-card.passed .exercise-number{color:var(--green);}
@@ -104,6 +110,37 @@
     .exercise-feedback.error{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
     .hint-box{display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:var(--yellow-bg);border:1px solid #f59e0b;border-radius:8px;font-size:0.875rem;color:#78350f;line-height:1.6;}
     .hint-box.show{display:block;}
+    /* ── Code Completion Exercise ── */
+    .cc-card{background:var(--card);border-radius:12px;border:2px solid #e0e7ff;padding:1.5rem;margin:2rem 0;transition:border-color 0.3s;}
+    .cc-card.passed{border-color:var(--green);}
+    .cc-number{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--primary);margin-bottom:0.5rem;}
+    .cc-card.passed .cc-number{color:var(--green-dark);}
+    .cc-question{font-size:1rem;font-weight:600;margin-bottom:1.25rem;line-height:1.5;}
+    .cc-code-wrap{background:#1e1e2e;border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.9rem;line-height:2;overflow-x:auto;}
+    .cc-blank{display:inline-block;min-width:90px;height:28px;background:#2d3748;border:2px dashed #4a5568;border-radius:6px;vertical-align:middle;cursor:pointer;transition:all 0.15s;position:relative;text-align:center;line-height:26px;font-size:0.82rem;}
+    .cc-blank.filled{background:#1a3a2a;border-color:var(--green);color:#6ee7b7;border-style:solid;}
+    .cc-blank.correct{background:#14532d;border-color:#22c55e;color:#86efac;border-style:solid;}
+    .cc-blank.incorrect{background:#450a0a;border-color:#ef4444;color:#fca5a5;border-style:solid;animation:shake 0.3s ease;}
+    .cc-blank.dragover{background:#1e3a5f;border-color:#60a5fa;border-style:solid;}
+    .cc-code-text{color:#cdd6f4;}
+    .cc-chip-pool{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;padding:0.85rem 1rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);min-height:48px;}
+    .cc-chip{display:inline-flex;align-items:center;padding:0.3rem 0.75rem;background:#1e1e2e;color:#a5b4fc;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;cursor:grab;user-select:none;border:1.5px solid #4a5568;transition:opacity 0.15s,transform 0.1s;}
+    .cc-chip:hover{transform:scale(1.04);border-color:#818cf8;}
+    .cc-chip.dragging{opacity:0.4;}
+    .cc-chip.used{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+    .cc-actions{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+    .btn-cc-check{padding:0.55rem 1.4rem;background:var(--primary);color:#fff;border:none;border-radius:7px;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;transition:background 0.15s;}
+    .btn-cc-check:hover:not(:disabled){background:var(--primary-hover);}
+    .btn-cc-check:disabled{opacity:0.5;cursor:not-allowed;}
+    .btn-cc-reset{padding:0.5rem 1rem;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:7px;font:inherit;font-size:0.82rem;cursor:pointer;}
+    .btn-cc-reset:hover{background:var(--bg);}
+    .cc-feedback{margin-top:0.9rem;padding:0.7rem 1rem;border-radius:8px;font-size:0.875rem;font-weight:500;display:none;}
+    .cc-feedback.show{display:block;}
+    .cc-feedback.success{background:var(--green-light);color:#065f46;border:1px solid #a7f3d0;}
+    .cc-feedback.error{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
+    .cc-hint{display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:var(--yellow-bg);border:1px solid #f59e0b;border-radius:8px;font-size:0.875rem;color:#78350f;line-height:1.6;}
+    .cc-hint.show{display:block;}
+    @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
     /* ── W3Schools-style Challenge Card ── */
     .challenge-card{background:var(--card);border-radius:12px;border:2px solid #e2e8f0;padding:0;margin:2rem 0;overflow:hidden;transition:border-color 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
     .challenge-card.passed{border-color:var(--green);}
@@ -209,6 +246,8 @@
     .btn-nav.primary:hover:not(.locked-nav){background:var(--green-dark);}
     .btn-nav.locked-nav{opacity:0.45;cursor:not-allowed;}
     .btn-complete{display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.6rem;border-radius:8px;border:none;background:var(--green);color:#fff;font:inherit;font-size:0.875rem;font-weight:600;cursor:pointer;transition:background 0.15s,opacity 0.15s;}
+    .btn-undo{display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 1.1rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--muted);font:inherit;font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.15s;}
+    .btn-undo:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2;}
     .btn-complete:hover:not(:disabled){background:var(--green-dark);}
     .btn-complete:disabled{opacity:0.45;cursor:not-allowed;background:var(--muted);}
     .btn-complete.done{background:#0f766e;}
@@ -297,7 +336,7 @@ async function init(){
     const[siblingsRes,coursesRes,progressRes,subsRes]=await Promise.all([
       fetch('/api/courses/'+lesson.course_id+'/lessons'),
       fetch('/api/courses'),
-      fetch('/api/lessons/'+lessonId+'/progress').catch(()=>null),
+      fetch('/api/lessons/'+lessonId+'/progress?t='+Date.now()).catch(()=>null),
       fetch('/api/lessons/'+lessonId+'/submissions').catch(()=>null)
     ]);
     allLessons=await siblingsRes.json();
@@ -305,13 +344,25 @@ async function init(){
     const courses=await coursesRes.json();
     const course=courses.find(c=>c.id===lesson.course_id);
     if(progressRes?.ok){
-      const progress=await progressRes.json();
-      progress.forEach(p=>{
+      const progressData = await progressRes.json();
+
+      // Server returns {rows, totalInteractive} — rows are passed attempts, totalInteractive is current lesson count
+      const rows        = Array.isArray(progressData) ? progressData : (progressData.rows || []);
+      const totalFromDB = progressData.totalInteractive ?? null;
+
+      rows.forEach(p=>{
         if(p.passed){
           passedInteractiveIndices.add(p.interactive_index);
           if(p.answer_index!=null) passedExerciseAnswers[p.exercise_index]=p.answer_index;
         }
       });
+
+      // If new interactives were added since last pass, clear ALL restored passes
+      // so the student must complete the new ones too
+      if(totalFromDB !== null && passedInteractiveIndices.size < totalFromDB){
+        passedInteractiveIndices.clear();
+        passedExerciseAnswers = {};
+      }
     }
     const isDone=completedIds.has(lesson.id);
     let existingSubs=[];
@@ -336,26 +387,30 @@ async function init(){
 function restoreInteractiveState(lessonAlreadyDone){
   let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
   const blocks=content.blocks||[];
+
+  // Count total interactives in current lesson content
+  const currentTotal=blocks.filter(b=>['exercise','challenge','assignment'].includes(b.type)).length;
+
+  // If DB has fewer passed records than current interactives, some are new — don't ghost-pass them
+  // Each iI is only passed if it has an explicit DB record
   let exI=0,chI=0,asI=0,iI=0;
   for(const b of blocks){
     if(['exercise','challenge','assignment'].includes(b.type)){
-      const alreadyPassed=lessonAlreadyDone||passedInteractiveIndices.has(iI);
+      // Only passed if explicit DB record exists for this interactive_index
+      const alreadyPassed=passedInteractiveIndices.has(iI) && iI<currentTotal;
       if(alreadyPassed && b.type==='exercise'){
+        // Hide all question panels, show passed state
+        const questions=b.questions||[];
+        questions.forEach((_,qi)=>{
+          const panel=document.getElementById('ex-qpanel-'+exI+'-'+qi);
+          if(panel)panel.style.display='none';
+          document.getElementById('ex-qdot-'+exI+'-'+qi)?.classList.add('passed');
+        });
         document.getElementById('exercise-'+exI)?.classList.add('passed');
         const numEl=document.querySelector('#exercise-'+exI+' .exercise-number');
         if(numEl)numEl.style.color='var(--green)';
-        const savedAnswerIdx=passedExerciseAnswers[exI];
-        (b.options||[]).forEach((_,i)=>{
-          const btn=document.getElementById('opt-'+exI+'-'+i);
-          if(!btn)return;
-          btn.disabled=true;
-          if(savedAnswerIdx!=null && i===savedAnswerIdx) btn.classList.add('correct');
-        });
-        const checkBtn=document.getElementById('ex-check-'+exI);
-        if(checkBtn){checkBtn.textContent='✓ Passed';checkBtn.style.background='var(--green)';checkBtn.disabled=true;}
         const fb=document.getElementById('ex-fb-'+exI);
-        if(fb){fb.textContent='✅ Correct! Well done.';fb.className='exercise-feedback show success';}
-        document.getElementById('ex-hint-btn-'+exI)?.remove();
+        if(fb){fb.innerHTML='✅ All questions correct! Well done.';fb.className='exercise-feedback show success';}
         blockPassed[iI]=true;
         updateProgressDot(iI,true);
       }
@@ -386,9 +441,7 @@ function restoreInteractiveState(lessonAlreadyDone){
   const passedCount=Object.values(blockPassed).filter(Boolean).length;
   const countEl=document.getElementById('bp-count');
   if(countEl)countEl.textContent=passedCount+'/'+totalInteractive;
-  if(totalInteractive>0 && Object.values(blockPassed).every(Boolean)){
-    unlockNextBtn();
-  } else if(lessonAlreadyDone && totalInteractive===0){
+  if(totalInteractive===0||Object.values(blockPassed).every(Boolean)){
     unlockNextBtn();
   }
 }
@@ -492,12 +545,15 @@ function renderLesson(){
       tryitBlocks[tIdx]=b.code||'';
       html+=`<button class="btn-try" onclick="openTryIt(${tIdx})">▶ Try it Yourself »</button>`;
     }
-    if(b.type==='exercise'){html+=buildExerciseHTML(b,exI,iI);exI++;iI++;}
+    if(b.type==='exercise'){
+      html+=buildExerciseBlockHTML(b,exI,iI);
+      exI++;iI++;
+    }
     if(b.type==='challenge'){html+=buildChallengeHTML(b,chI,iI);chI++;iI++;}
     if(b.type==='assignment'){html+=buildAssignmentHTML(b,asI,iI);asI++;iI++;}
   }
 
-  const allBlocksDone=totalInteractive===0||Object.values(blockPassed).every(Boolean)||isDone;
+  const allBlocksDone=totalInteractive===0||Object.values(blockPassed).every(Boolean);
   const nextLocked=!allBlocksDone;
   // Complete Lesson button logic:
   // - No activities → always enabled
@@ -539,6 +595,313 @@ function renderLesson(){
   }
   let chIdx2=0;
   blocks.forEach(b=>{if(b.type==='challenge'){const i2=chIdx2;setTimeout(()=>initChallengeEditor(i2,b),80+i2*60);chIdx2++;}});
+}
+
+/* ═══════════════════════════════════════════
+   EXERCISE BLOCK — multi-question with progress
+   ═══════════════════════════════════════════ */
+
+// Per-block state: {blockExI: {currentQ, passedQs, totalQs}}
+let exBlockState = {};
+
+function buildExerciseBlockHTML(b, exI, iI){
+  const questions = b.questions || [];
+  // Legacy support: single question format
+  if(!questions.length && b.question){
+    const legacyQ = b.exerciseType==='code_completion'
+      ? {type:'code_completion', question:b.question, codeTemplate:b.codeTemplate, answers:b.answers, hint:b.hint}
+      : {type:'multiple_choice', question:b.question, options:b.options, hint:b.hint};
+    return buildExerciseBlockHTML({...b, questions:[legacyQ]}, exI, iI);
+  }
+  if(!questions.length) return '';
+
+  const num = totalInteractive>1 ? `📝 Exercise ${iI+1}` : '📝 Exercise';
+  const total = questions.length;
+
+  // Progress dots
+  const dots = questions.map((_,qi)=>
+    `<div class="ex-qdot" id="ex-qdot-${exI}-${qi}"></div>`
+  ).join('');
+
+  // Build all question panels (only first visible)
+  let qPanels = '';
+  questions.forEach((q,qi)=>{
+    const isFirst = qi===0;
+    const qType = q.type||'multiple_choice';
+    qPanels += `<div class="ex-qpanel" id="ex-qpanel-${exI}-${qi}" style="${isFirst?'':'display:none'}">`;
+    if(qType==='multiple_choice'){
+      qPanels += buildMCQuestionHTML(q, exI, qi);
+    } else {
+      qPanels += buildCCQuestionHTML(q, exI, qi);
+    }
+    qPanels += `</div>`;
+  });
+
+  return `<div class="exercise-card" id="exercise-${exI}">
+    <div class="exercise-number">${num}</div>
+    <div class="ex-progress-wrap">
+      <div class="ex-qdots" id="ex-qdots-${exI}">${dots}</div>
+      <span class="ex-qcount" id="ex-qcount-${exI}">1 / ${total}</span>
+    </div>
+    ${qPanels}
+    <div class="exercise-feedback" id="ex-fb-${exI}"></div>
+  </div>`;
+}
+
+function buildMCQuestionHTML(q, exI, qi){
+  const letters=['A','B','C','D','E','F'];
+  const opts=(q.options||[]).map((o,i)=>
+    `<button class="option-btn" id="opt-${exI}-${qi}-${i}" onclick="selectMCOption(${exI},${qi},${i})">
+      <div class="option-letter">${letters[i]}</div>
+      <span>${esc(o.text)}</span>
+    </button>`
+  ).join('');
+  return `<div class="ex-question">${esc(q.question)}</div>
+    <div class="option-list" id="opt-list-${exI}-${qi}">${opts}</div>
+    <div class="exercise-actions">
+      <button class="btn-check" id="mc-check-${exI}-${qi}" onclick="checkMCQuestion(${exI},${qi})" disabled>Check Answer</button>
+      ${q.hint?`<button class="btn-hint" id="mc-hint-btn-${exI}-${qi}" onclick="showMCHint(${exI},${qi})" style="display:none">💡 Hint</button>`:''}
+    </div>
+    ${q.hint?`<div class="hint-box" id="mc-hint-${exI}-${qi}"><strong>💡 Hint:</strong> ${esc(q.hint)}</div>`:''}`;
+}
+
+function buildCCQuestionHTML(q, exI, qi){
+  const answers = q.answers||[];
+  const template = q.codeTemplate||'';
+  const parts = template.split('[blank]');
+
+  let codeHtml='';
+  parts.forEach((part,i)=>{
+    codeHtml+=`<span class="cc-code-text">${escHtml(part).replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}</span>`;
+    if(i<parts.length-1){
+      codeHtml+=`<span class="cc-blank" id="cc-blank-${exI}-${qi}-${i}"
+        data-qidx="${qi}" data-bidx="${i}" data-exidx="${exI}"
+        ondragover="ccDragOver2(event,${exI},${qi},${i})"
+        ondragleave="ccDragLeave2(event,${exI},${qi},${i})"
+        ondrop="ccDrop2(event,${exI},${qi},${i})"
+        onclick="ccBlankClick2(${exI},${qi},${i})"
+        title="Drag an answer here">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
+    }
+  });
+
+  const shuffled=[...answers].sort(()=>Math.random()-0.5);
+  const chips=shuffled.map((a,ci)=>
+    `<span class="cc-chip" id="cc-chip-${exI}-${qi}-${ci}"
+      draggable="true" data-answer="${esc(a)}" data-chipidx="${ci}"
+      ondragstart="ccDragStart2(event,${exI},${qi},${ci})"
+      ondragend="ccDragEnd2(event,${exI},${qi},${ci})"
+      onclick="ccChipClick2(${exI},${qi},${ci})"
+    >${escHtml(a)}</span>`
+  ).join('');
+
+  return `<div class="ex-question">${esc(q.question)}</div>
+    <div class="cc-code-wrap" style="margin-bottom:1rem;">${codeHtml}</div>
+    <div class="cc-chip-pool" id="cc-pool-${exI}-${qi}">${chips}</div>
+    <div class="exercise-actions">
+      <button class="btn-check" id="cc-check-${exI}-${qi}" onclick="checkCCQuestion(${exI},${qi})" disabled>Submit Answer</button>
+      <button class="btn-cc-reset" onclick="resetCCQuestion(${exI},${qi})">↺ Reset</button>
+      ${q.hint?`<button class="btn-hint" id="cc-hint-btn-${exI}-${qi}" onclick="showCCHint(${exI},${qi})" style="display:none">💡 Hint</button>`:''}
+    </div>
+    ${q.hint?`<div class="hint-box" id="cc-hint-${exI}-${qi}"><strong>💡 Hint:</strong> ${esc(q.hint)}</div>`:''}`;
+}
+
+// ── MC question logic ──
+let mcSelected={};
+function selectMCOption(exI,qi,optI){
+  const key=`${exI}-${qi}`;
+  mcSelected[key]=optI;
+  document.querySelectorAll(`#opt-list-${exI}-${qi} .option-btn`).forEach(b=>b.classList.remove('selected'));
+  document.getElementById(`opt-${exI}-${qi}-${optI}`)?.classList.add('selected');
+  document.getElementById(`mc-check-${exI}-${qi}`).disabled=false;
+}
+
+async function checkMCQuestion(exI,qi){
+  const key=`${exI}-${qi}`;
+  const optI=mcSelected[key];
+  if(optI===undefined)return;
+  const btn=document.getElementById(`mc-check-${exI}-${qi}`);
+  btn.disabled=true;btn.textContent='…';
+
+  let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
+  const exBlocks=(content.blocks||[]).filter(b=>b.type==='exercise');
+  const block=exBlocks[exI];
+  const q=block?.questions?.[qi];
+  if(!q)return;
+  const correct=q.options?.[optI]?.correct||false;
+
+  if(correct){
+    q.options.forEach((_,i)=>{
+      const b=document.getElementById(`opt-${exI}-${qi}-${i}`);
+      if(!b)return;b.disabled=true;
+      if(i===optI)b.classList.add('correct');else b.classList.remove('selected');
+    });
+    btn.textContent='✓ Correct';btn.style.background='var(--green)';
+    document.getElementById(`mc-hint-btn-${exI}-${qi}`)?.remove();
+    advanceExercise(exI,qi,true);
+  } else {
+    const wrongBtn=document.getElementById(`opt-${exI}-${qi}-${optI}`);
+    if(wrongBtn){wrongBtn.classList.remove('selected');wrongBtn.classList.add('incorrect');}
+    const hintBtn=document.getElementById(`mc-hint-btn-${exI}-${qi}`);
+    if(hintBtn)hintBtn.style.display='';
+    setTimeout(()=>{
+      if(wrongBtn)wrongBtn.classList.remove('incorrect');
+      mcSelected[key]=undefined;
+      document.querySelectorAll(`#opt-list-${exI}-${qi} .option-btn`).forEach(b=>b.classList.remove('selected'));
+      btn.disabled=false;btn.textContent='Try Again';
+    },900);
+  }
+}
+function showMCHint(exI,qi){
+  document.getElementById(`mc-hint-${exI}-${qi}`)?.classList.add('show');
+  document.getElementById(`mc-hint-btn-${exI}-${qi}`)?.remove();
+}
+
+// ── CC question logic (new scoped version) ──
+let ccDragging2={};
+let ccSelected2=null;
+
+function ccDragStart2(e,exI,qi,ci){
+  ccDragging2={exI,qi,ci,answer:document.getElementById(`cc-chip-${exI}-${qi}-${ci}`)?.dataset.answer||''};
+  document.getElementById(`cc-chip-${exI}-${qi}-${ci}`)?.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function ccDragEnd2(e,exI,qi,ci){document.getElementById(`cc-chip-${exI}-${qi}-${ci}`)?.classList.remove('dragging');}
+function ccDragOver2(e,exI,qi,bi){e.preventDefault();document.getElementById(`cc-blank-${exI}-${qi}-${bi}`)?.classList.add('dragover');}
+function ccDragLeave2(e,exI,qi,bi){document.getElementById(`cc-blank-${exI}-${qi}-${bi}`)?.classList.remove('dragover');}
+function ccDrop2(e,exI,qi,bi){
+  e.preventDefault();
+  document.getElementById(`cc-blank-${exI}-${qi}-${bi}`)?.classList.remove('dragover');
+  if(ccDragging2.exI!==exI||ccDragging2.qi!==qi)return;
+  ccPlaceAnswer2(exI,qi,bi,ccDragging2.ci,ccDragging2.answer);
+}
+function ccChipClick2(exI,qi,ci){
+  const chip=document.getElementById(`cc-chip-${exI}-${qi}-${ci}`);
+  if(chip?.classList.contains('used'))return;
+  if(ccSelected2&&ccSelected2.exI===exI&&ccSelected2.qi===qi&&ccSelected2.ci===ci){
+    chip?.style.removeProperty('outline');ccSelected2=null;return;
+  }
+  if(ccSelected2)document.getElementById(`cc-chip-${ccSelected2.exI}-${ccSelected2.qi}-${ccSelected2.ci}`)?.style.removeProperty('outline');
+  ccSelected2={exI,qi,ci,answer:chip?.dataset.answer||''};
+  chip?.style.setProperty('outline','2px solid var(--primary)');
+}
+function ccBlankClick2(exI,qi,bi){
+  const blank=document.getElementById(`cc-blank-${exI}-${qi}-${bi}`);
+  if(!blank)return;
+  if(ccSelected2&&ccSelected2.exI===exI&&ccSelected2.qi===qi){
+    document.getElementById(`cc-chip-${ccSelected2.exI}-${ccSelected2.qi}-${ccSelected2.ci}`)?.style.removeProperty('outline');
+    ccPlaceAnswer2(exI,qi,bi,ccSelected2.ci,ccSelected2.answer);
+    ccSelected2=null;
+  } else if(blank.classList.contains('filled')){
+    ccReturnBlank2(exI,qi,bi);
+  }
+}
+function ccPlaceAnswer2(exI,qi,bi,ci,answer){
+  const blank=document.getElementById(`cc-blank-${exI}-${qi}-${bi}`);
+  if(!blank)return;
+  const oldCi=blank.dataset.chipIdx;
+  if(oldCi!==undefined&&oldCi!=='')ccReturnChip2(exI,qi,parseInt(oldCi));
+  blank.textContent=answer;blank.classList.add('filled');blank.classList.remove('dragover','correct','incorrect');
+  blank.dataset.chipIdx=ci;blank.dataset.value=answer;
+  document.getElementById(`cc-chip-${exI}-${qi}-${ci}`)?.classList.add('used');
+  updateCCSubmitBtn2(exI,qi);
+}
+function ccReturnBlank2(exI,qi,bi){
+  const blank=document.getElementById(`cc-blank-${exI}-${qi}-${bi}`);
+  if(!blank||!blank.classList.contains('filled'))return;
+  ccReturnChip2(exI,qi,parseInt(blank.dataset.chipIdx));
+  blank.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';blank.classList.remove('filled','correct','incorrect');
+  blank.dataset.chipIdx='';blank.dataset.value='';updateCCSubmitBtn2(exI,qi);
+}
+function ccReturnChip2(exI,qi,ci){document.getElementById(`cc-chip-${exI}-${qi}-${ci}`)?.classList.remove('used');}
+function updateCCSubmitBtn2(exI,qi){
+  const blanks=document.querySelectorAll(`[id^="cc-blank-${exI}-${qi}-"]`);
+  const filled=[...blanks].filter(b=>b.classList.contains('filled')).length;
+  const btn=document.getElementById(`cc-check-${exI}-${qi}`);
+  if(btn)btn.disabled=filled<blanks.length;
+}
+function resetCCQuestion(exI,qi){
+  document.querySelectorAll(`[id^="cc-blank-${exI}-${qi}-"]`).forEach(blank=>{
+    const ci=parseInt(blank.dataset.chipIdx);
+    if(!isNaN(ci))ccReturnChip2(exI,qi,ci);
+    blank.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';blank.classList.remove('filled','correct','incorrect');
+    blank.dataset.chipIdx='';blank.dataset.value='';
+  });
+  updateCCSubmitBtn2(exI,qi);
+}
+async function checkCCQuestion(exI,qi){
+  let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
+  const exBlocks=(content.blocks||[]).filter(b=>b.type==='exercise');
+  const q=exBlocks[exI]?.questions?.[qi];if(!q)return;
+  const answers=q.answers||[];
+  const blanks=document.querySelectorAll(`[id^="cc-blank-${exI}-${qi}-"]`);
+  let allCorrect=true;
+  blanks.forEach((blank,i)=>{
+    const sa=(blank.dataset.value||'').trim().toLowerCase();
+    const ca=(answers[i]||'').trim().toLowerCase();
+    if(sa===ca){blank.classList.add('correct');blank.classList.remove('incorrect','filled');}
+    else{blank.classList.add('incorrect');blank.classList.remove('correct','filled');allCorrect=false;}
+  });
+  if(allCorrect){
+    document.getElementById(`cc-check-${exI}-${qi}`)?.setAttribute('disabled','true');
+    document.getElementById(`cc-hint-btn-${exI}-${qi}`)?.remove();
+    advanceExercise(exI,qi,true);
+  } else {
+    if(q.hint)document.getElementById(`cc-hint-${exI}-${qi}`)?.classList.add('show');
+    setTimeout(()=>{
+      blanks.forEach((blank,i)=>{
+        if(blank.classList.contains('incorrect')){
+          ccReturnChip2(exI,qi,parseInt(blank.dataset.chipIdx));
+          blank.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+          blank.classList.remove('incorrect','correct','filled');
+          blank.dataset.chipIdx='';blank.dataset.value='';
+        }
+      });
+      updateCCSubmitBtn2(exI,qi);
+    },1500);
+  }
+}
+function showCCHint(exI,qi){
+  document.getElementById(`cc-hint-${exI}-${qi}`)?.classList.add('show');
+  document.getElementById(`cc-hint-btn-${exI}-${qi}`)?.remove();
+}
+
+// ── Advance to next question or complete exercise ──
+async function advanceExercise(exI, qi, correct){
+  let content={};try{content=JSON.parse(lesson.content||'{}');}catch(_){}
+  const exBlocks=(content.blocks||[]).filter(b=>b.type==='exercise');
+  const block=exBlocks[exI];
+  const questions=block?.questions||[];
+  const total=questions.length;
+  const iI=getIIforEx(exI);
+
+  // Mark dot as passed
+  document.getElementById(`ex-qdot-${exI}-${qi}`)?.classList.add('passed');
+
+  const nextQi=qi+1;
+  if(nextQi<total){
+    // Show next question after short delay
+    setTimeout(()=>{
+      document.getElementById(`ex-qpanel-${exI}-${qi}`).style.display='none';
+      document.getElementById(`ex-qpanel-${exI}-${nextQi}`).style.display='';
+      document.getElementById(`ex-qcount-${exI}`).textContent=`${nextQi+1} / ${total}`;
+    },600);
+  } else {
+    // All questions passed — mark exercise complete
+    try{
+      await fetch('/api/exercises/check',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({lesson_id:lesson.id,exercise_index:exI,interactive_index:iI,answer_index:0,passed:true})
+      });
+    }catch(_){}
+    setTimeout(()=>{
+      document.getElementById(`ex-qpanel-${exI}-${qi}`).style.display='none';
+      const fb=document.getElementById('ex-fb-'+exI);
+      if(fb){fb.innerHTML='✅ All questions correct! Well done.';fb.className='exercise-feedback show success';}
+      document.getElementById('exercise-'+exI)?.classList.add('passed');
+      const numEl=document.querySelector('#exercise-'+exI+' .exercise-number');
+      if(numEl)numEl.style.color='var(--green)';
+      onBlockPassed(iI);
+    },600);
+  }
 }
 
 function buildExerciseHTML(b,exI,iI){

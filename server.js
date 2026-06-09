@@ -394,14 +394,29 @@ app.post('/api/lessons/:id/complete', requireAuth, async (req, res) => {
 
 app.post('/api/lessons/:id/uncomplete', requireAuth, async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const userId   = req.session.user.id;
     const lessonId = parseInt(req.params.id);
-    const lesson = await get('SELECT course_id FROM lessons WHERE id = ?', [lessonId]);
+    const lesson   = await get('SELECT course_id FROM lessons WHERE id = ?', [lessonId]);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+
+    // Log to confirm this code is running
+    console.log('[UNDO] userId:', userId, 'lessonId:', lessonId);
+
+    // Delete exercise attempts first — check count before and after
+    const before = await get('SELECT COUNT(*) as cnt FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
+    console.log('[UNDO] exercise_attempts before:', before?.cnt);
+
+    await run('DELETE FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
+    await run('DELETE FROM submissions WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
     await run('DELETE FROM lesson_completions WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
+
+    const after = await get('SELECT COUNT(*) as cnt FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
+    console.log('[UNDO] exercise_attempts after:', after?.cnt);
+
     const progress = await recalcProgress(userId, lesson.course_id);
-    res.json({ success: true, progress });
+    res.json({ success: true, progress, debug: { before: before?.cnt, after: after?.cnt } });
   } catch (err) {
+    console.error('[UNDO] error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -442,29 +457,20 @@ app.post('/api/exercises/check', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
     const { lesson_id, exercise_index, interactive_index, answer_index, passed } = req.body;
 
-    const iIdx = interactive_index ?? exercise_index ?? 0;
-    const eIdx = exercise_index ?? 0;
-    const aIdx = answer_index ?? 0;
-
-    // Always upsert — never downgrade a previously passed attempt
-    await run(`
-      INSERT INTO exercise_attempts
-        (user_id, lesson_id, exercise_index, interactive_index, answer_index, passed, attempted_at)
-      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-      ON CONFLICT(user_id, lesson_id, interactive_index)
-      DO UPDATE SET
-        answer_index = excluded.answer_index,
-        attempted_at = CURRENT_TIMESTAMP,
-        passed       = CASE WHEN exercise_attempts.passed = 1 THEN 1 ELSE excluded.passed END
-    `, [userId, lesson_id, eIdx, iIdx, aIdx, passed ? 1 : 0]);
-
-    // If passed, check if all interactives in the lesson are now done → auto-complete lesson
     if (passed) {
+      await run(`
+        INSERT INTO exercise_attempts
+          (user_id, lesson_id, exercise_index, interactive_index, answer_index, passed, attempted_at)
+        VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, lesson_id, interactive_index)
+        DO UPDATE SET answer_index=excluded.answer_index, passed=1, attempted_at=CURRENT_TIMESTAMP
+      `, [userId, lesson_id, exercise_index ?? 0, interactive_index ?? exercise_index ?? 0, answer_index ?? 0]);
+
       const lesson = await get('SELECT * FROM lessons WHERE id = ?', [lesson_id]);
       if (lesson) {
-        let lessonContent = {};
-        try { lessonContent = JSON.parse(lesson.content || '{}'); } catch (_) {}
-        const totalInteractive = (lessonContent.blocks || []).filter(b =>
+        let content = {};
+        try { content = JSON.parse(lesson.content || '{}'); } catch (_) {}
+        const totalInteractive = (content.blocks || []).filter(b =>
           ['exercise', 'challenge', 'assignment'].includes(b.type)
         ).length;
         if (totalInteractive > 0) {
@@ -479,8 +485,7 @@ app.post('/api/exercises/check', requireAuth, async (req, res) => {
         }
       }
     }
-
-    res.json({ success: true, passed: !!passed });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
