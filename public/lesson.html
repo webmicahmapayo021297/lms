@@ -1344,12 +1344,15 @@ async function checkChallenge(chI){
     return comments;
   }
 
-  // Extract all tags present in code (tag names only)
+  // Extract all tags present in code (tag names only, including DOCTYPE)
   function getTags(c){
     const tags = new Set();
+    // Match regular tags
     const re = /<([a-zA-Z][a-zA-Z0-9]*)/g;
     let m;
     while((m=re.exec(c))!==null) tags.add(m[1].toLowerCase());
+    // Match <!DOCTYPE html> specifically
+    if(/<!DOCTYPE\s+html/i.test(c)) tags.add('!doctype');
     return tags;
   }
 
@@ -1449,11 +1452,13 @@ async function checkChallenge(chI){
                     relevantSolAV.every(sav => stuAttrVals.some(av=>av.attr===sav.attr&&av.val===sav.val));
       }
     }
-    // 4. Tag check e.g. "wrap in <blockquote>"
-    else if(/<[a-zA-Z]/.test(req)){
+    // 4. Tag check e.g. "wrap in <blockquote>" or "add <!DOCTYPE html>"
+    else if(/<[!a-zA-Z]/.test(req)){
+      const reqTags = [];
+      // Check for DOCTYPE specifically
+      if(/<!DOCTYPE/i.test(req)) reqTags.push('!doctype');
       const tagRe2 = /<([a-zA-Z][a-zA-Z0-9]*)/g;
       let tm;
-      const reqTags = [];
       while((tm=tagRe2.exec(req))!==null) reqTags.push(tm[1].toLowerCase());
       // Check student has all required tags (that solution also has)
       reqPassed = reqTags.every(tag => stuTags.has(tag) || stuCommentedOut.has(tag));
