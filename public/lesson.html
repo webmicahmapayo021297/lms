@@ -1328,194 +1328,143 @@ async function checkChallenge(chI){
   const codeLC       = code.toLowerCase();
   const expected     = expectedOutput.trim().toLowerCase();
 
-  // ── Checklist validation: compare student code vs solution code ──
+  // ── DOM-based checklist validation (like W3Schools) ──
+  // Renders student code in a hidden iframe, then uses querySelector to check each requirement
   let passedCount = 0;
 
-  function normalizeCode(c){
-    return c.replace(/\s+/g,' ').replace(/<!--[\s\S]*?-->/g, m => m).trim().toLowerCase();
-  }
-
-  // Extract all HTML comments from code: returns array of comment strings
-  function getComments(c){
-    const comments = [];
-    const re = /<!--([\s\S]*?)-->/g;
-    let m;
-    while((m=re.exec(c))!==null) comments.push(m[1].trim().toLowerCase());
-    return comments;
-  }
-
-  // Extract all tags present in code (tag names only, including DOCTYPE)
-  function getTags(c){
-    const tags = new Set();
-    // Match regular tags
-    const re = /<([a-zA-Z][a-zA-Z0-9]*)/g;
-    let m;
-    while((m=re.exec(c))!==null) tags.add(m[1].toLowerCase());
-    // Match <!DOCTYPE html> specifically
-    if(/<!DOCTYPE\s+html/i.test(c)) tags.add('!doctype');
-    return tags;
-  }
-
-  // Extract attribute=value pairs from code
-  function getAttrVals(c){
-    const pairs = [];
-    const re = /([a-zA-Z][a-zA-Z0-9-]*)=["']([^"']*)["']/g;
-    let m;
-    while((m=re.exec(c))!==null) pairs.push({attr:m[1].toLowerCase(), val:m[2].toLowerCase()});
-    return pairs;
-  }
-
-  // Get lines that are commented out: <!-- <tag>...</tag> -->
-  function getCommentedOutTags(c){
-    const tags = new Set();
-    const re = /<!--[\s\S]*?-->/g;
-    let m;
-    while((m=re.exec(c))!==null){
-      const inner = m[0];
-      const tagRe = /<([a-zA-Z][a-zA-Z0-9]*)/g;
-      let t;
-      while((t=tagRe.exec(inner))!==null) tags.add(t[1].toLowerCase());
-    }
-    return tags;
-  }
-
-  const solutionCode = meta.solution || '';
-  const studentCode  = code;
-
-  // Parse both
-  const solComments     = getComments(solutionCode);
-  const stuComments     = getComments(studentCode);
-  const solTags         = getTags(solutionCode);
-  const stuTags         = getTags(studentCode);
-  const solAttrVals     = getAttrVals(solutionCode);
-  const stuAttrVals     = getAttrVals(studentCode);
-  const solCommentedOut = getCommentedOutTags(solutionCode);
-  const stuCommentedOut = getCommentedOutTags(studentCode);
-  const stuCodeLC       = studentCode.toLowerCase();
-  const solCodeLC       = solutionCode.toLowerCase();
-
-  reqs.forEach((r,ri)=>{
+  function domCheck(iframeDoc, rawCode, req){
     // Decode HTML entities in requirement text
-    const req = r.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"');
-    const reqLC = req.toLowerCase();
-    let reqPassed = false;
+    const r = req.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"');
+    const rLC = r.toLowerCase();
+    const codeLC = rawCode.toLowerCase();
 
-    // ── Strategy: check what the SOLUTION has that the STUDENT should also have ──
+    // ── 1. DOCTYPE check ──
+    if (/<!doctype/i.test(r)) {
+      return /<!doctype\s+html/i.test(rawCode);
+    }
 
-    // 1. If solution has a comment not in starter → student must have a similar comment
-    //    Match by checking if any student comment contains key words from solution comment
-    const solOnlyComments = solComments.filter(sc =>
-      !getComments(meta.starter||'').some(stc => stc === sc)
-    );
+    // ── 2. HTML comment check ──
+    // "add a comment" or "add an html comment"
+    if (/\bcomment\b/i.test(r) && !/comment out|commented out|hidden/i.test(r)) {
+      // Extract the text that should be in the comment (bold text or quoted)
+      const boldMatch = r.match(/<strong>([^<]+)<\/strong>/i) || r.match(/\*\*([^*]+)\*\*/);
+      const quotedMatch = r.match(/["']([^"']{3,})["']/);
+      const commentText = boldMatch ? boldMatch[1] : (quotedMatch ? quotedMatch[1] : null);
+      // Check raw code for HTML comment
+      const comments = [];
+      const commentRe = /<!--([\s\S]*?)-->/g;
+      let m;
+      while ((m = commentRe.exec(rawCode)) !== null) comments.push(m[1].trim().toLowerCase());
+      if (commentText) {
+        return comments.some(c => c.includes(commentText.toLowerCase()));
+      }
+      return comments.length > 0;
+    }
 
-    // 2. Check if requirement mentions "comment" keyword
-    if(/comment/i.test(req)){
-      if(/comment out|hidden|hide/i.test(req)){
-        // Requirement: comment out something → check student has commented-out tags matching solution
-        const solHasCommentedTags = solCommentedOut.size > 0;
-        reqPassed = solHasCommentedTags
-          ? [...solCommentedOut].every(tag => stuCommentedOut.has(tag))
-          : stuComments.length > 0;
-      } else {
-        // Requirement: add a comment → check student has a comment with similar content
-        // Find which solution comment matches this requirement
-        const reqWords = reqLC.replace(/<[^>]+>/g,'').split(/\s+/).filter(w=>w.length>3);
-        const matchingSolComment = solOnlyComments.find(sc =>
-          reqWords.some(w => sc.includes(w))
-        );
-        if(matchingSolComment){
-          // Student must have a comment containing the key text from the solution comment
-          reqPassed = stuComments.some(sc =>
-            matchingSolComment.split(' ').filter(w=>w.length>2).every(w => sc.includes(w))
-          );
-        } else {
-          reqPassed = stuComments.length > solComments.length ||
-                      stuComments.some(sc => reqWords.some(w => sc.includes(w)));
+    // ── 3. Comment out / hide element ──
+    if (/comment out|commented out|hidden from|hide.*browser/i.test(r)) {
+      // Check that the element is wrapped in <!-- -->
+      // Find tag names mentioned in requirement
+      const tagMatch = r.match(/<([a-zA-Z][a-zA-Z0-9]*)/);
+      if (tagMatch) {
+        const tag = tagMatch[1].toLowerCase();
+        // Check raw code: the tag should appear inside a comment
+        const commentRe2 = /<!--([\s\S]*?)-->/g;
+        let m2;
+        while ((m2 = commentRe2.exec(rawCode)) !== null) {
+          if (new RegExp('<' + tag + '[\\s>/]', 'i').test(m2[1])) return true;
         }
+        return false;
       }
+      return false;
     }
-    // 3. Attribute=value check e.g. src="img_girl.jpg", width="250"
-    else if(/\bset\b|\bsrc\b|\balt\b|\bwidth\b|\bheight\b|\bhref\b|\btype\b|\bname\b|\bvalue\b|attribute/i.test(req) || solAttrVals.length > 0){
-      // Try to extract attr=val directly from requirement text
-      const reqAttrMatch = req.match(/([a-zA-Z][a-zA-Z0-9-]*)=["']([^"']*)["']/);
-      if(reqAttrMatch){
-        // Explicit attr="val" in requirement
-        const attr = reqAttrMatch[1].toLowerCase();
-        const val  = reqAttrMatch[2].toLowerCase();
-        reqPassed  = stuAttrVals.some(av => av.attr===attr && av.val===val);
-      } else {
-        // Pattern: "Set <attr> to <value>" — e.g. "Set src to img_girl.jpg"
-        const setMatch = req.match(/set\s+([a-zA-Z][a-zA-Z0-9-]*)\s+to\s+([^\s,\.]+)/i);
-        if(setMatch){
-          const attr = setMatch[1].toLowerCase();
-          const val  = setMatch[2].toLowerCase().replace(/['"]/g,'');
-          // Check student code has this attribute with this value
-          reqPassed = stuAttrVals.some(av => av.attr===attr && av.val===val)
-                   || stuCodeLC.includes(attr+'="'+val+'"')
-                   || stuCodeLC.includes(attr+"='"+val+"'")
-                   || stuCodeLC.includes(attr+'='+val);
-        } else {
-          // Find matching attr/val in solution and check student has same
-          const reqWords = reqLC.split(/\s+/).filter(w=>w.length>2);
-          const relevantSolAV = solAttrVals.filter(av =>
-            reqWords.some(w => av.attr===w || av.val.includes(w))
-          );
-          reqPassed = relevantSolAV.length === 0 ||
-                      relevantSolAV.every(sav => stuAttrVals.some(av=>av.attr===sav.attr&&av.val===sav.val));
+
+    // ── 4. Attribute=value check using DOM querySelector ──
+    // Pattern: "Set <attr> to <value>" OR attr="value" in requirement
+    const setMatch = r.match(/\bset\s+([a-zA-Z][a-zA-Z0-9-]*)\s+to\s+["']?([^\s"'<>,\.]+)["']?/i);
+    const attrValMatch = r.match(/([a-zA-Z][a-zA-Z0-9-]*)=["']([^"']*)["']/);
+
+    if (setMatch || attrValMatch) {
+      const attr = (setMatch ? setMatch[1] : attrValMatch[1]).toLowerCase();
+      const val  = (setMatch ? setMatch[2] : attrValMatch[2]).toLowerCase();
+      // Check via raw code string (most reliable)
+      return codeLC.includes(attr + '="' + val + '"') ||
+             codeLC.includes(attr + "='" + val + "'") ||
+             codeLC.includes(attr + '=' + val);
+    }
+
+    // ── 5. Tag existence check via DOM ──
+    const tagNames = [];
+    const tagRe = /<([a-zA-Z][a-zA-Z0-9]*)/g;
+    let tm;
+    while ((tm = tagRe.exec(r)) !== null) tagNames.push(tm[1].toLowerCase());
+
+    if (tagNames.length > 0) {
+      return tagNames.every(tag => {
+        // Check DOM first
+        if (iframeDoc && iframeDoc.querySelector) {
+          if (iframeDoc.querySelector(tag)) return true;
         }
-      }
-    }
-    // 4. Tag check e.g. "wrap in <blockquote>" or "add <!DOCTYPE html>"
-    else if(/<[!a-zA-Z]/.test(req)){
-      const reqTags = [];
-      // Check for DOCTYPE specifically
-      if(/<!DOCTYPE/i.test(req)) reqTags.push('!doctype');
-      const tagRe2 = /<([a-zA-Z][a-zA-Z0-9]*)/g;
-      let tm;
-      while((tm=tagRe2.exec(req))!==null) reqTags.push(tm[1].toLowerCase());
-      // Check student has all required tags (that solution also has)
-      reqPassed = reqTags.every(tag => stuTags.has(tag) || stuCommentedOut.has(tag));
-      // Also check attribute values mentioned in same requirement
-      const avMatch = req.match(/["']([^"']{3,})["']/g);
-      if(avMatch){
-        avMatch.forEach(quoted => {
-          const val = quoted.replace(/["']/g,'').toLowerCase();
-          if(!stuCodeLC.includes(val)) reqPassed = false;
-        });
-      }
-    }
-    // 5. Fallback: check key phrases from requirement appear in student code
-    else {
-      // Extract quoted values or bold text as required strings
-      const quotedVals = [];
-      const qRe = /["']([^"']{3,})["']/g;
-      let qm;
-      while((qm=qRe.exec(req))!==null) quotedVals.push(qm[1].toLowerCase());
-      const boldRe = /<strong>([^<]+)<\/strong>/gi;
-      while((qm=boldRe.exec(req))!==null) quotedVals.push(qm[1].toLowerCase());
-
-      if(quotedVals.length > 0){
-        reqPassed = quotedVals.every(v => stuCodeLC.includes(v) || renderedText.includes(v));
-      } else {
-        const words = reqLC.replace(/<[^>]+>/g,' ').split(/\s+/)
-          .map(w=>w.replace(/[^a-z0-9]/g,'')).filter(w=>w.length>4);
-        reqPassed = words.length===0 || words.some(w=>stuCodeLC.includes(w)||renderedText.includes(w));
-      }
+        // Fallback: raw code check (tag with or without attributes)
+        return new RegExp('<' + tag + '[\\s>/]', 'i').test(rawCode);
+      });
     }
 
-    const item = document.getElementById('ch-ci-'+chI+'-'+ri);
-    const box  = document.getElementById('ch-cb-'+chI+'-'+ri);
-    if(item && box){
-      if(reqPassed){
-        item.classList.add('checked'); item.classList.remove('failed');
-        box.textContent='✓'; box.style.background=''; box.style.borderColor=''; box.style.color='';
-        passedCount++;
-      } else {
-        item.classList.remove('checked'); item.classList.add('failed');
-        box.textContent='✕'; box.style.background='#fee2e2'; box.style.borderColor='#fca5a5'; box.style.color='#991b1b';
-      }
+    // ── 6. Text content check via DOM ──
+    // Check bold/strong text in requirement against rendered output
+    const boldMatches = [...r.matchAll(/<strong>([^<]+)<\/strong>/gi),
+                         ...r.matchAll(/\*\*([^*]+)\*\*/g)];
+    if (boldMatches.length > 0) {
+      const bodyText = iframeDoc ? (iframeDoc.body?.innerText || '').toLowerCase() : '';
+      return boldMatches.every(m => bodyText.includes(m[1].toLowerCase()));
+    }
+
+    // ── 7. Quoted value check ──
+    const qRe = /["']([^"'<>{}/\\]{3,})["']/g;
+    let qm;
+    const quotedVals = [];
+    while ((qm = qRe.exec(r)) !== null) quotedVals.push(qm[1].toLowerCase());
+    if (quotedVals.length > 0) {
+      return quotedVals.every(v => codeLC.includes(v));
+    }
+
+    // ── 8. Fallback: keyword check ──
+    const words = rLC.replace(/<[^>]+>/g, ' ').split(/\s+/)
+      .map(w => w.replace(/[^a-z0-9]/g, '')).filter(w => w.length > 4);
+    const bodyText = iframeDoc ? (iframeDoc.body?.innerText || '').toLowerCase() : '';
+    return words.length === 0 || words.some(w => codeLC.includes(w) || bodyText.includes(w));
+  }
+
+  // Render student code in a hidden iframe to get the DOM
+  const checkIframe = document.createElement('iframe');
+  checkIframe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+  checkIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+  document.body.appendChild(checkIframe);
+  checkIframe.srcdoc = code;
+
+  await new Promise(resolve => {
+    checkIframe.onload = resolve;
+    setTimeout(resolve, 600); // timeout fallback
+  });
+
+  const iframeDoc = checkIframe.contentDocument || checkIframe.contentWindow?.document;
+
+  reqs.forEach((r, ri) => {
+    const reqPassed = domCheck(iframeDoc, code, r);
+    const item = document.getElementById('ch-ci-' + chI + '-' + ri);
+    const box  = document.getElementById('ch-cb-' + chI + '-' + ri);
+    if (!item || !box) return;
+    if (reqPassed) {
+      item.classList.add('checked'); item.classList.remove('failed');
+      box.textContent = '✓'; box.style.cssText = '';
+      passedCount++;
+    } else {
+      item.classList.remove('checked'); item.classList.add('failed');
+      box.textContent = '✕'; box.style.cssText = 'background:#fee2e2;border-color:#fca5a5;color:#991b1b;';
     }
   });
+
+  document.body.removeChild(checkIframe);
 
   // ── Main pass/fail ──
   const passed = reqs.length > 0
