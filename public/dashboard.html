@@ -153,7 +153,6 @@
     .lesson-status.open   { background: var(--primary-light); color: var(--primary); }
     .lesson-status.locked { background: #f1f5f9; color: var(--muted); }
 
-    /* ── Undo button ── */
     .btn-undo {
       padding: 0.22rem 0.55rem;
       font-size: 0.7rem; font-weight: 600;
@@ -321,7 +320,8 @@
 
   function buildLessonRow(lesson, courseId) {
     const done   = !!lesson.completed;
-    const locked = !lesson.unlocked && !done;
+    // lesson.unlocked can be undefined if session expired — treat undefined as unlocked for order_num=1
+    const locked = !lesson.unlocked && !done && lesson.order_num !== 1;
     const dotClass  = done ? 'done' : locked ? 'locked' : '';
     const dotInner  = done ? '✓' : locked ? '🔒' : '';
 
@@ -331,11 +331,10 @@
       ? `<span class="lesson-status locked">🔒 Locked</span>`
       : `<span class="lesson-status open">▶ Start</span>`;
 
-    // Undo button only on completed lessons
     const undoBtn = done
       ? `<button class="btn-undo" id="undo-${lesson.id}"
                  onclick="undoLesson(event, ${lesson.id}, ${courseId})"
-                 title="Mark as incomplete">↩ Undo</button>`
+                 title="Reset lesson — clears all exercises, challenges and assignments">↩ Undo</button>`
       : '';
 
     if (locked) {
@@ -358,17 +357,19 @@
       </a>`;
   }
 
-  /* ── Undo completion ── */
+  /* ── Undo — clears exercises, challenges, assignments AND lesson completion ── */
   async function undoLesson(e, lessonId, courseId) {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!confirm('Reset this lesson? This will clear all your exercise, challenge and assignment progress so you can redo everything.')) return;
 
     const btn = document.getElementById(`undo-${lessonId}`);
     btn.disabled    = true;
     btn.textContent = '…';
 
     try {
-      const res = await fetch(`/api/lessons/${lessonId}/uncomplete`, { method: 'POST' });
+      const res = await fetch(`/api/lessons/${lessonId}/undo`, { method: 'POST' });
       if (!res.ok) throw new Error();
       const { progress } = await res.json();
 

@@ -9,7 +9,12 @@ const db = require('./db');
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-app.use(session({ secret: 'lms-secret', resave: false, saveUninitialized: false }));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'lms-secret-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }
+}));
 
 // Root route
 app.get('/', (req, res) => {
@@ -350,7 +355,11 @@ app.get('/api/teacher/lessons/:id', requireTeacher, async (req, res) => {
 app.get('/api/courses/:id/lessons', async (req, res) => {
   try {
     const lessons = await all('SELECT * FROM lessons WHERE course_id = ? ORDER BY order_num', [req.params.id]);
-    if (req.session.user) await annotateUnlock(req.session.user.id, lessons);
+    if (req.session.user) {
+      await annotateUnlock(req.session.user.id, lessons);
+    } else {
+      lessons.forEach((l, i) => { l.unlocked = i === 0; l.completed = false; });
+    }
     res.json(lessons);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -394,9 +403,9 @@ app.post('/api/lessons/:id/complete', requireAuth, async (req, res) => {
 
 app.post('/api/lessons/:id/uncomplete', requireAuth, async (req, res) => {
   try {
-    const userId   = req.session.user.id;
+    const userId = req.session.user.id;
     const lessonId = parseInt(req.params.id);
-    const lesson   = await get('SELECT course_id FROM lessons WHERE id = ?', [lessonId]);
+    const lesson = await get('SELECT course_id FROM lessons WHERE id = ?', [lessonId]);
     if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
     await run('DELETE FROM exercise_attempts WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
     await run('DELETE FROM submissions WHERE user_id = ? AND lesson_id = ?', [userId, lessonId]);
@@ -410,13 +419,25 @@ app.post('/api/lessons/:id/uncomplete', requireAuth, async (req, res) => {
 
 app.get('/api/lessons/:id/progress', requireAuth, async (req, res) => {
   try {
+    const lessonId = req.params.id;
+    const userId   = req.session.user.id;
     const rows = await all(`
       SELECT interactive_index, exercise_index, answer_index, passed
       FROM exercise_attempts
       WHERE user_id = ? AND lesson_id = ? AND passed = 1
       ORDER BY interactive_index ASC
-    `, [req.session.user.id, req.params.id]);
-    res.json(rows);
+    `, [userId, lessonId]);
+    const lesson = await get('SELECT content FROM lessons WHERE id = ?', [lessonId]);
+    let totalInteractive = 0;
+    if (lesson) {
+      let c = {};
+      try { c = JSON.parse(lesson.content || '{}'); } catch (_) {}
+      totalInteractive = (c.blocks || []).filter(b =>
+        ['exercise', 'challenge', 'assignment'].includes(b.type)
+      ).length;
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json({ rows, totalInteractive });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
