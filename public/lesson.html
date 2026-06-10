@@ -1434,22 +1434,35 @@ async function checkChallenge(chI){
         }
       }
     }
-    // 3. Attribute=value check e.g. cite="https://..." title="..."
-    else if(solAttrVals.length > 0 && /attribute|=/.test(req)){
-      // Find attr=val in solution that's relevant to this requirement
+    // 3. Attribute=value check e.g. src="img_girl.jpg", width="250"
+    else if(/\bset\b|\bsrc\b|\balt\b|\bwidth\b|\bheight\b|\bhref\b|\btype\b|\bname\b|\bvalue\b|attribute/i.test(req) || solAttrVals.length > 0){
+      // Try to extract attr=val directly from requirement text
       const reqAttrMatch = req.match(/([a-zA-Z][a-zA-Z0-9-]*)=["']([^"']*)["']/);
       if(reqAttrMatch){
+        // Explicit attr="val" in requirement
         const attr = reqAttrMatch[1].toLowerCase();
         const val  = reqAttrMatch[2].toLowerCase();
         reqPassed  = stuAttrVals.some(av => av.attr===attr && av.val===val);
       } else {
-        // Find relevant sol attr/val by keywords
-        const reqWords = reqLC.split(/\s+/).filter(w=>w.length>3);
-        const relevantSolAV = solAttrVals.filter(av =>
-          reqWords.some(w => av.attr.includes(w) || av.val.includes(w))
-        );
-        reqPassed = relevantSolAV.length === 0 ||
-                    relevantSolAV.every(sav => stuAttrVals.some(av=>av.attr===sav.attr&&av.val===sav.val));
+        // Pattern: "Set <attr> to <value>" — e.g. "Set src to img_girl.jpg"
+        const setMatch = req.match(/set\s+([a-zA-Z][a-zA-Z0-9-]*)\s+to\s+([^\s,\.]+)/i);
+        if(setMatch){
+          const attr = setMatch[1].toLowerCase();
+          const val  = setMatch[2].toLowerCase().replace(/['"]/g,'');
+          // Check student code has this attribute with this value
+          reqPassed = stuAttrVals.some(av => av.attr===attr && av.val===val)
+                   || stuCodeLC.includes(attr+'="'+val+'"')
+                   || stuCodeLC.includes(attr+"='"+val+"'")
+                   || stuCodeLC.includes(attr+'='+val);
+        } else {
+          // Find matching attr/val in solution and check student has same
+          const reqWords = reqLC.split(/\s+/).filter(w=>w.length>2);
+          const relevantSolAV = solAttrVals.filter(av =>
+            reqWords.some(w => av.attr===w || av.val.includes(w))
+          );
+          reqPassed = relevantSolAV.length === 0 ||
+                      relevantSolAV.every(sav => stuAttrVals.some(av=>av.attr===sav.attr&&av.val===sav.val));
+        }
       }
     }
     // 4. Tag check e.g. "wrap in <blockquote>" or "add <!DOCTYPE html>"
