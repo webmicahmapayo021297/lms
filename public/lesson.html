@@ -1381,16 +1381,28 @@ async function checkChallenge(chI){
 
     // ── 4. Attribute=value check using DOM querySelector ──
     // Pattern: "Set <attr> to <value>" OR attr="value" in requirement
-    const setMatch = r.match(/\bset\s+([a-zA-Z][a-zA-Z0-9-]*)\s+to\s+["']?([^\s"'<>,\.]+)["']?/i);
+    // "Set src to img_girl.jpg" or "Set alt to Girl with a jacket"
+    // Capture everything after "to " until end of meaningful text
+    const setMatch = r.match(/\bset\s+([a-zA-Z][a-zA-Z0-9-]*)\s+to\s+["']?(.+?)["']?\s*$/i);
     const attrValMatch = r.match(/([a-zA-Z][a-zA-Z0-9-]*)=["']([^"']*)["']/);
 
     if (setMatch || attrValMatch) {
-      const attr = (setMatch ? setMatch[1] : attrValMatch[1]).toLowerCase();
-      const val  = (setMatch ? setMatch[2] : attrValMatch[2]).toLowerCase();
-      // Check via raw code string (most reliable)
-      return codeLC.includes(attr + '="' + val + '"') ||
-             codeLC.includes(attr + "='" + val + "'") ||
-             codeLC.includes(attr + '=' + val);
+      const attr = (setMatch ? setMatch[1] : attrValMatch[1]).toLowerCase().trim();
+      const val  = (setMatch ? setMatch[2] : attrValMatch[2]).toLowerCase().trim();
+      // Check via raw code and also via DOM getAttribute
+      const inCode = codeLC.includes(attr + '="' + val + '"') ||
+                     codeLC.includes(attr + "='" + val + "'") ||
+                     codeLC.includes(attr + '=' + val);
+      if (inCode) return true;
+      // Also check via DOM querySelector on all elements
+      if (iframeDoc) {
+        const allEls = iframeDoc.querySelectorAll('*');
+        for (const el of allEls) {
+          const attrVal = el.getAttribute(attr);
+          if (attrVal !== null && attrVal.toLowerCase() === val) return true;
+        }
+      }
+      return false;
     }
 
     // ── 5. Tag existence check via DOM ──
