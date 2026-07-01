@@ -1363,20 +1363,54 @@ async function checkChallenge(chI){
 
     // ── 3. Comment out / hide element ──
     if (/comment out|commented out|hidden from|hide.*browser/i.test(r)) {
-      // Check that the element is wrapped in <!-- -->
-      // Find tag names mentioned in requirement
+      // Try a literal tag first, e.g. requirement text containing "<p>"
       const tagMatch = r.match(/<([a-zA-Z][a-zA-Z0-9]*)/);
-      if (tagMatch) {
-        const tag = tagMatch[1].toLowerCase();
-        // Check raw code: the tag should appear inside a comment
-        const commentRe2 = /<!--([\s\S]*?)-->/g;
-        let m2;
-        while ((m2 = commentRe2.exec(rawCode)) !== null) {
-          if (new RegExp('<' + tag + '[\\s>/]', 'i').test(m2[1])) return true;
+      let tag = tagMatch ? tagMatch[1].toLowerCase() : null;
+
+      // Fallback: map common plain-English element names to tags
+      if (!tag) {
+        const tagWords = {
+          paragraph: 'p', paragraphs: 'p',
+          heading: 'h1', headings: 'h1', title: 'h1',
+          image: 'img', picture: 'img', images: 'img',
+          link: 'a', links: 'a', anchor: 'a',
+          button: 'button',
+          'list item': 'li', item: 'li',
+          list: 'ul',
+          header: 'header', footer: 'footer', nav: 'nav',
+          div: 'div', division: 'div', section: 'section',
+          table: 'table', row: 'tr'
+        };
+        for (const word in tagWords) {
+          if (rLC.includes(word)) { tag = tagWords[word]; break; }
         }
-        return false;
       }
-      return false;
+      if (!tag) return false;
+
+      // Determine which occurrence (1st, 2nd, 3rd...) — default to the first
+      const ordinalWords = { first: 0, second: 1, third: 2, fourth: 3, fifth: 4, sixth: 5 };
+      let ordinal = 0;
+      for (const w in ordinalWords) {
+        if (rLC.includes(w)) { ordinal = ordinalWords[w]; break; }
+      }
+      const numMatch = rLC.match(/(\d+)(st|nd|rd|th)\b/);
+      if (numMatch) ordinal = parseInt(numMatch[1], 10) - 1;
+
+      // Find every <tag occurrence in document order, and every comment range
+      const commentRanges = [];
+      const commentRe2 = /<!--([\s\S]*?)-->/g;
+      let cm;
+      while ((cm = commentRe2.exec(rawCode)) !== null) {
+        commentRanges.push([cm.index, cm.index + cm[0].length]);
+      }
+      const tagRe2 = new RegExp('<' + tag + '[\\s>/]', 'gi');
+      const positions = [];
+      let tm2;
+      while ((tm2 = tagRe2.exec(rawCode)) !== null) positions.push(tm2.index);
+
+      if (positions.length <= ordinal) return false; // that occurrence doesn't exist at all
+      const targetPos = positions[ordinal];
+      return commentRanges.some(([start, end]) => targetPos >= start && targetPos < end);
     }
 
     // ── 4. Attribute=value check using DOM querySelector ──
